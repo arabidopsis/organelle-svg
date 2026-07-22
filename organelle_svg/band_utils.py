@@ -315,9 +315,14 @@ class Overlapping:
                 start, end = int(part.start), int(part.end)  # type: ignore
                 if end <= start:
                     continue
-                i = intrange(start, end)
+                while start < 0:
+                    start += len(rec)
+                    end += len(rec)
                 s = strands(part.strand)
+                i = intrange(start, end)
+
                 b[s].add(i)
+
                 if i in fmap[s]:
                     of, op = fmap[s][i]
                     collisions.append(((feat, part), (of, op)))
