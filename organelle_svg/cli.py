@@ -100,6 +100,7 @@ def plot_type(choices: list[str]):
 
 
 @click.group(epilog=click.style("Organelle SVG\n", fg="magenta"))
+@click.version_option()
 def cli() -> None:
     pass
 
