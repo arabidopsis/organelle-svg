@@ -337,10 +337,14 @@ class Overlapping:
                 continue
             for part in feat.location.parts:
                 # end must be greater that start
-                if part.end <= part.start:  # type: ignore
+                start, end = int(part.start), int(part.end)  # type: ignore
+                if end <= start:  # type: ignore
                     continue
+                while start < 0:
+                    start += len(rec)
+                    end += len(rec)
                 s = strands(part.strand)
-                po = intrange(int(part.start), int(part.end))  # type: ignore
+                po = intrange(start, end)  # type: ignore
                 for o in b[s].overlaps(po):
                     # ofeat, opart = fmap[s][o]
                     if not o == po and o not in seen:
