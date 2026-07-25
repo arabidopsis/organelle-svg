@@ -18,26 +18,17 @@ if TYPE_CHECKING:
     from Bio.SeqFeature import SeqFeature
 
 
-def sanitize_option(name: str) -> str:
-    # can't use () for options since these are stripped
-    # in `Circos::Utils::parse_csv` ....
-    # 'LEFT DOUBLE PARENTHESIS' (U+2E28)
-    # 'RIGHT DOUBLE PARENTHESIS' (U+2E29)
-    name = name.replace(" ", "\u00a0")
-    return name.replace("(", "⸨").replace(")", "⸩")
-
-
 def sanitize_name(name: str) -> str:
     # maybe set tab as separator.... `file_delim = \t`
     # no spaces in names (circos files are space separated)
     # but 'NO-BREAK SPACE' (U+00A0) seems to work
-    name = name.replace(" ", "\u00a0")
+    # name = name.replace(" ", "\u00a0")
     # circos svg interprets underscores as subscript for svg
     #  'FULLWIDTH LOW LINE' (U+FF3F)
-    name = name.replace("_", "\uff3f")
+    # name = name.replace("_", "\uff3f")
     # circos seems to barf with quote "'" marks for 3' 5' etc
     # 'RIGHT SINGLE QUOTATION MARK' (U+2019)
-    name = name.replace("'", "’")
+    # name = name.replace("'", "’")
     return name
 
 
@@ -64,9 +55,6 @@ class Band:
         self.idx = idx
         self.type = gene_type
         self.color_ = color
-        self.strand_key_: str | None = None
-        self.option_name_: str | None = None
-        self.option_gene_: str | None = None
         self.properties_ = properties or {}
         self._props_text: str | None = None
 
@@ -78,20 +66,6 @@ class Band:
         if self._props_text is None:
             self._props_text = ",".join(f"{k}={v}" for k, v in self.properties_.items())
         return self._props_text
-
-    @property
-    def option_name(self) -> str:
-        # can't use () for options since these are stripped
-        # in `Circos::Utils::parse_csv` ....
-        if self.option_name_ is None:
-            self.option_name_ = sanitize_option(self.name)
-        return self.option_name_
-
-    @property
-    def option_gene(self) -> str:
-        if self.option_gene_ is None:
-            self.option_gene_ = sanitize_option(self.gene)
-        return self.option_gene_
 
     @property
     def color(self) -> str | None:
@@ -113,13 +87,6 @@ class Band:
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.name},{self.gene},[{self.start},{self.end}], {self.strand})"
-
-    @property
-    def strand_key(self) -> str:
-        if self.strand_key_ is None:
-            self.strand_key_ = self.STRANDS.get(self.strand)
-        assert isinstance(self.strand_key_, str)
-        return self.strand_key_
 
 
 def get_range_map(rec: SeqRecord) -> dict[int, intrangeset]:
@@ -210,7 +177,7 @@ def get_bands(
             typ = "gene"
         else:
             gene = rec.name
-            name = sanitize_name(rec.name)
+            name = sanitize_name(gene)
             if nc[rec.name] > 1:
                 name = f"{name}/{count}"
                 gene = f"{gene}/{count}"
