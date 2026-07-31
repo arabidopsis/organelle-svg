@@ -109,10 +109,10 @@ class NormalDraw(BaseDraw):
 
         data = datad[1]
 
-        inner = circle(0, 0, txt, fill=None, stroke=self.stroke, stroke_width=sw)
+        inner = circle(0, 0, txt, fill=None, stroke=self.colors.stroke, stroke_width=sw)
         g.append(inner)
 
-        attrib = self.merge_attr(attrib, opacity=1, klass="name", stroke=self.stroke)
+        attrib = self.merge_attr(attrib, opacity=1, klass="name", stroke=self.colors.stroke)
 
         def dotext(
             strand: Any,
@@ -135,6 +135,7 @@ class NormalDraw(BaseDraw):
                 dp=0.02,  # relative values
                 fill=fill,
                 stroke_width=sw,
+                text_color=self.colors.text_color,
                 **attrib,
             )
             g.append(txt)
@@ -163,7 +164,7 @@ class NormalDraw(BaseDraw):
         if 1 in datad:  # from strand_key above
             _, pos1, dr = self.get_band_pos()
             g.append(
-                circle(0, 0, pos1 - dr, fill=None, stroke=self.stroke, stroke_width=sw),
+                circle(0, 0, pos1 - dr, fill=None, stroke=self.colors.stroke, stroke_width=sw),
             )
             ov: list[Overlap] = datad[1]
             dotext(1, ov, fill="black", outside=False, pos=pos1 - dr)
@@ -190,7 +191,7 @@ class NormalDraw(BaseDraw):
                     pos,
                     klass=klass,
                     fill=None,
-                    stroke=self.stroke,
+                    stroke=self.colors.stroke,
                     stroke_width=sw,
                 ),
             )
@@ -230,7 +231,7 @@ class NormalDraw(BaseDraw):
                         0,
                         pos,
                         fill=None,
-                        stroke=self.stroke,
+                        stroke=self.colors.stroke,
                         stroke_width=self.sw,
                         klass="gc",
                     ),

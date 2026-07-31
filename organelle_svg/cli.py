@@ -50,7 +50,7 @@ def all_options(func):
         "--bg",
         "bg_color",
         default="white",
-        help='background color (use "none" for transparent)',
+        help='background color (use "none" for no background)',
         show_default=True,
     )(func)
     func = click.option(
@@ -121,17 +121,17 @@ def single(
     pretty_print: bool,
 ) -> None:
     """Generate SVG from a genbank or gff file"""
-    from .api import OGDraw, DepthDraw, GCOGDraw
+    from .api import OGDraw, DepthDraw, GCOGDraw, ColorScheme
 
-    bg = bg_color if bg_color != "none" else False
+    colors = ColorScheme(bg=bg_color)
 
     rec = readit(gb_or_gff)
     if plot_type == "ogdraw":
-        draw = OGDraw(rec, irscan=True, rotate_image=rotate_image, bg=bg)
+        draw = OGDraw(rec, irscan=True, rotate_image=rotate_image, colors=colors)
     elif plot_type == "gc":
-        draw = GCOGDraw(rec, irscan=True, rotate_image=rotate_image, bg=bg)
+        draw = GCOGDraw(rec, irscan=True, rotate_image=rotate_image, colors=colors)
     else:
-        draw = DepthDraw(rec, irscan=True, rotate_image=rotate_image, bg=bg)
+        draw = DepthDraw(rec, irscan=True, rotate_image=rotate_image, colors=colors)
 
     svg = draw.to_string(pretty_print=pretty_print)
     out(output, svg)
@@ -158,9 +158,9 @@ def pairs(
     pretty_print: bool,
 ) -> None:
     """Generate SVG from pairs of genbank or gff files"""
-    from .api import NormalDraw, PairsDraw, BaseDraw
+    from .api import NormalDraw, PairsDraw, BaseDraw, ColorScheme
 
-    bg = bg_color if bg_color != "none" else False
+    colors = ColorScheme(bg=bg_color)
     draw: BaseDraw
 
     rec_in = readit(gb_or_gff_inside)
@@ -171,7 +171,7 @@ def pairs(
             rec_out,
             irscan=True,
             rotate_image=rotate_image,
-            bg=bg,
+            colors=colors,
         )
     else:
         draw = PairsDraw(
@@ -179,7 +179,7 @@ def pairs(
             rec_out,
             irscan=True,
             rotate_image=rotate_image,
-            bg=bg,
+            colors=colors,
         )
 
     svg = draw.to_string(pretty_print=pretty_print)
@@ -207,9 +207,9 @@ def stacked(
     pretty_print: bool,
 ) -> None:
     """Generate SVG from a list of genbank or gff files"""
-    from .api import StackedDraw
+    from .api import StackedDraw, ColorScheme
 
-    bg = bg_color if bg_color != "none" else False
+    colors = ColorScheme(bg=bg_color)
     recs = [readit(f) for f in gb_or_gff]
 
     draw = StackedDraw(
@@ -217,7 +217,7 @@ def stacked(
         recs,
         irscan=True,
         rotate_image=rotate_image,
-        bg=bg,
+        colors=colors,
     )
 
     svg = draw.to_string(pretty_print=pretty_print)

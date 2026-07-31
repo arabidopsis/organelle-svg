@@ -59,6 +59,7 @@ class StackedDraw(BaseDraw):
         tloc = self.r(self.tick_loc)
         dr = self.r(self.dr)
         g = group(klass="ticks")
+        stroke = self.colors.stroke
 
         ticks(
             self.N,
@@ -66,14 +67,14 @@ class StackedDraw(BaseDraw):
             g,
             self.r,
             get_angle=self.get_angle,
-            stroke="grey",
+            stroke=stroke,
             grid=(tloc - dr / 2, self.r(0.3)),
             grid_opacity=0.4,
             font_size=self.r(0.03),
             opacity=0.5,
             # text_fill="#ffffff",
         )
-        g.append(circle(0, 0, r=tloc, fill=None, stroke="grey", stroke_width=1))
+        g.append(circle(0, 0, r=tloc, fill=None, stroke=stroke, stroke_width=1))
         self.g.append(g)
 
     def layers(self) -> Iterator[tuple[SeqFeature, int]]:
@@ -120,6 +121,8 @@ class StackedDraw(BaseDraw):
         get_angle, r, colorf = self.get_angle, self.r, self.colorf
         dr = r(self.dr)
 
+        stroke = self.colors.stroke
+
         g = group(klass="band")
 
         for feat, n in self.layers():
@@ -133,12 +136,12 @@ class StackedDraw(BaseDraw):
                     color=colorf(gene),
                     dr=dr,
                     get_angle=get_angle,
-                    stroke="grey",
+                    stroke=stroke,
                     stroke_width=1,
                 ),
             )
 
-        g.append(circle(0, 0, r=loc, fill=None, stroke="grey", stroke_width=3))
+        g.append(circle(0, 0, r=loc, fill=None, stroke=stroke, stroke_width=3))
         self.g.append(g)
 
     def get_gene(self, feat: SeqFeature) -> str:

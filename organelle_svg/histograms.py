@@ -173,7 +173,7 @@ def gc_histogram(
     **attrib: Any,
 ) -> None:
     attrib.setdefault("offset", False)
-    attrib.setdefault("inverted", True)
+    attrib.setdefault("inverted", False)
     attrib = merge_attr(attrib, klass="gc")
     d = gc_hist(rec, span=100)
     g.append(hist(d, r0, r=r, get_angle=get_angle, **attrib))

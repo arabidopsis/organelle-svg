@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from .svg import TEXT_TYPE
     from .og_colors import PatternKeys, ColourTuple
 
-GC_HIST_BACKGROUND = "rgb(217,217,217)"
 HISTOGRAM_COLORS = {"depth": "rgba(250,0,0,.6)", "coverage": "rgba(0,0,255,.6)"}
 STRAND_COLORS = {1: "rgb(239,59,44)", -1: "rgb(66,146,198)"}
 # background color for SFF in normal plot

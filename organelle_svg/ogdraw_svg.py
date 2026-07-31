@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 from collections import defaultdict
+from dataclasses import dataclass
 from math import pi
 from typing import Any
 from typing import override
@@ -22,7 +23,6 @@ from .svg import savesvg
 from .svg import tobytes
 from .svg import tostring
 from .svg_colors import colorer
-from .svg_colors import GC_HIST_BACKGROUND
 from .svg_colors import GenomeInfo
 from .svg_colors import HISTOGRAM_COLORS
 from .svg_utils import arc
@@ -184,6 +184,7 @@ def draw_inverted_repeat(
     get_angle: Callable[[int], float],
     scan_width: float,
     swapped: bool = False,
+    text_color: str = "grey",
     **attrib: Any,
 ) -> Element:
     g = group(klass="irscan")
@@ -207,13 +208,14 @@ def draw_inverted_repeat(
         sbar = radial_line(sa, r0, r0 + r(0.01), **attr)
         ebar = radial_line(ea, r0, r0 + r(0.01), **attr)
         g.extend([a, sbar, ebar])
+        attr = {**attrib, "stroke": text_color, "fill": text_color}
         g.append(
             text_horz(
                 [Overlap(middle(sa, ea), txt, delta_a=0, delta_r=20)],
                 r0,
                 fs=fs * 1.5,
                 r=r,
-                **attrib,
+                **attr,
             ),
         )
 
@@ -499,16 +501,25 @@ class AttrMerger:
             **local_defaults,
         )
 
+@dataclass(kw_only=True)
+class ColorScheme:
+    bg: str = "black"
+    stroke: str = "grey"
+    stroke_circles: str = "grey"
+    text_color: str = "orange"
+    gc_background: str = "none"
+
 
 class BaseDrawArgs(TypedDict, total=False):
     radius: int
-    bg: bool | str
     genome: str | None
     subfeatures: bool
     scale: float
     opacity: float
     irscan: bool | IRScan | None
     rotate_image: bool
+    show_ticks: bool
+    colors: ColorScheme
     attrib: dict[str, Any]
 
 
@@ -516,24 +527,24 @@ class BaseDraw(AttrMerger, abc.ABC):
     styles_to_classes: bool = True
     gc_pos: float = 0.38
     gc_width: float = 0.075
-    gc_background: str = GC_HIST_BACKGROUND
     show_id: bool = False
     class_prefix: str = "cls"
     add_legend: bool = True
-    stroke: str = "grey"
     ir_swapped: bool = False
     genome_info_class: type[GenomeInfo] = GenomeInfo
 
     def __init__(
         self,
+        *,
         radius: int = 1000,
-        bg: bool | str = False,
         genome: str | None = None,
         subfeatures: bool = False,
         scale: float = 1.0,
         opacity: float = 1.0,
         irscan: bool | IRScan | None = True,
         rotate_image: bool = False,
+        colors: ColorScheme | None = None,
+        show_ticks: bool = True,
         attrib: dict[str, Any] | None = None,
     ):
         super().__init__(**(attrib or {}))
@@ -544,7 +555,8 @@ class BaseDraw(AttrMerger, abc.ABC):
             irscan = None
 
         self.radius = radius
-        self.bg = bg
+        self.colors = colors or ColorScheme()
+        self.show_ticks = show_ticks
         self.subfeatures = subfeatures
         self.scale = scale
         self.opacity = opacity
@@ -556,15 +568,15 @@ class BaseDraw(AttrMerger, abc.ABC):
         r = maker(radius * scale)
         # svg = create_svg(radius)
         svg = svge(2 * radius)
-        if bg:
-            svg.append(rect(0, 0, 2 * radius, fill=bg, opacity=opacity, klass="bg"))
+        if self.colors.bg and self.colors.bg != "none":
+            svg.append(rect(0, 0, 2 * radius, fill=self.colors.bg, opacity=opacity, klass="bg"))
 
         # effective font width in degrees....
 
         self.fs = scale * pi * radius / 180.0
         self.svg = svg
         self.r = r
-        self.sw = r(1 / self.radius)
+        self.sw = r(1 / self.radius) if self.colors.stroke != "none" else 0
         self.irscan_width = r(6 / self.radius)
         self.reinit()
 
@@ -647,14 +659,14 @@ class BaseDraw(AttrMerger, abc.ABC):
             center_text.append(
                 (
                     f"rotated {self.rotate_image_angle:,} bp",
-                    {"font-size": str(25 * r), "color": "rgba(0,0,0,.6)"},
+                    {"font-size": str(25 * r), "color": self.colors.text_color},
                 ),
             )
 
         attrib = {
             "opacity": 1.0,
             "font_size": 45 * r,
-            "color": "rgba(0,0,0,1.0)",
+            "color": self.colors.text_color,
             **attrib,
         }
 
@@ -681,6 +693,7 @@ class BaseDraw(AttrMerger, abc.ABC):
             height=width,
             inline=True,
             box_size=20 * r,
+            text_color=self.colors.text_color,
         )
 
     def get_IR(self, rec: SeqRecord) -> IRScanResult | None:
@@ -730,13 +743,13 @@ class BaseDraw(AttrMerger, abc.ABC):
     ) -> None:
         r, g = self.r, self.g
         loc = self.get_tick_pos()
-        stroke = self.stroke
+        stroke = self.colors.stroke
 
         attrib = self.merge_attr(
             attrib,
             opacity=1,
-            fill="grey",
-            grid_opacity=0.2,
+            fill=stroke,
+            grid_opacity=0.4,
             stroke=stroke,
         )
         g2 = ticks(
@@ -787,6 +800,7 @@ class BaseDraw(AttrMerger, abc.ABC):
                 get_angle=get_angle,
                 scan_width=self.irscan_width,
                 swapped=self.ir_swapped,
+                text_color=self.colors.text_color,
                 **attrib,
             ),
         )
@@ -808,11 +822,12 @@ class BaseDraw(AttrMerger, abc.ABC):
 
         r = self.r
         g = group(klass="sff")
-        cattr = dict(fill=None, stroke_width=sw, stroke="grey")
+        stroke = self.colors.stroke
+        cattr = dict(fill=None, stroke_width=sw, stroke=stroke)
         g.append(circle(0, 0, pos, **cattr))
         attrib = self.merge_attr(
             attrib,
-            background=self.gc_background,  # , opacity=self.opacity
+            background=self.colors.gc_background,  # , opacity=self.opacity
         )
         attrib.pop("fill", None)
         depth_histogram(
@@ -848,9 +863,10 @@ class BaseDraw(AttrMerger, abc.ABC):
             return
         attrib = self.merge_attr(
             attrib,
-            background=self.gc_background,
-            fill="grey",
+            background=self.colors.gc_background,
+            fill=self.colors.stroke,
             opacity=self.opacity,
+            inverted=False,
         )
         g = self.g
         pos, gcw = self.get_gc_pos()
@@ -891,7 +907,6 @@ class OGDraw(BaseDraw):
     def __init__(
         self,
         rec: SeqRecord,
-        show_ticks: bool = True,
         **kwargs: Unpack[BaseDrawArgs],
     ):
         super().__init__(**kwargs)
@@ -913,7 +928,6 @@ class OGDraw(BaseDraw):
         self.rec = rec
         self.get_angle = get_angle
         self.get_tick_angle = get_tick_angle
-        self.show_ticks = show_ticks
         self.rotate_image_angle = rot
         self.ir_swapped = ir_swapped
 
@@ -946,10 +960,12 @@ class OGDraw(BaseDraw):
         tattr = self.merge_attr(
             attrib,
             stroke_width=sw,
+            stroke=self.colors.stroke,
             offset=30 / 1000,
             dp=7 / 1000,
             opacity=1.0,
             klass="name",
+
         )
 
         show_overlap(g, rec, r0 - r(0.1), r, get_angle, dr=r(0.05), **attrib)
@@ -963,6 +979,7 @@ class OGDraw(BaseDraw):
                     r,
                     radius=self.radius,
                     outside=True,
+                    text_color=self.colors.text_color,
                     **tattr,
                 ),
             )
@@ -975,6 +992,7 @@ class OGDraw(BaseDraw):
                     r,
                     radius=self.radius,
                     outside=False,
+                    text_color=self.colors.text_color,
                     **tattr,
                 ),
             )
@@ -984,7 +1002,7 @@ class OGDraw(BaseDraw):
                 0,
                 0,
                 r0 - r(0.1),
-                stroke="black",
+                stroke=self.colors.stroke_circles,
                 klass="band-path",
                 fill=None,
                 stroke_width=3 * sw,
@@ -994,7 +1012,7 @@ class OGDraw(BaseDraw):
         battr = self.merge_attr(
             attrib,
             stroke_width=sw,
-            stroke="black",
+            stroke=self.colors.stroke_circles,
             offset=30 / 1000,
             dp=7 / 1000,
             opacity=1.0,
@@ -1020,7 +1038,8 @@ class OGDraw(BaseDraw):
         self.base_doirscan(self.rec, self.get_angle, **attrib)
 
     def postscript(self, **attrib: Any) -> None:
-        self.doirscan(**attrib)
+        aa = {"stroke": self.colors.stroke_circles, **attrib}
+        self.doirscan(**aa)
         # put bling ontop
         self.svg.append(self.g)
         self.add_bling(self.rec, **attrib)

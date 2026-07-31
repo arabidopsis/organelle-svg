@@ -575,7 +575,7 @@ def hist(
         rule = myrule
 
     g = group(klass=klass(attrib, None))
-    if background:
+    if background and background != "none":
         g.append(path(d=annular_path(0, 0, pos, r(1)), fill=background, opacity=0.6))
     rr = pos + (r(0.5) if offset else 0)
     if offset:
@@ -681,6 +681,7 @@ def text_perp(
     offset: float = 0.0,
     dp: float = 0.02,
     radius: float = 1000,
+    text_color: str = "grey",
     **attrib: Any,
 ) -> Element:
     """Draw polar text at radius r0 of fontsize fs.
@@ -691,6 +692,9 @@ def text_perp(
     tattrib = {k: v for k, v in attrib.items() if k not in {"stroke", "stroke_width"}}
     if "font_family" not in tattrib:
         tattrib["font_family"] = FontFamily
+    # tattrib["stroke"] = 'green'
+    tattrib["fill"] = text_color
+    tattrib["stroke_width"] = 0.0
     sw = r(3 / radius)
     if "stroke_width" in attrib:
         sw = attrib.pop("stroke_width")

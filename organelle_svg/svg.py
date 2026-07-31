@@ -83,6 +83,7 @@ def add_legend(
     box_size: float | None = None,
     inline: bool = False,
     escape: bool = True,
+    text_color: str = "grey",
     **attrib: Any,
 ) -> Element:
     font_family = font_family or FontFamily
@@ -91,11 +92,12 @@ def add_legend(
     size = font_size // 1.5 if box_size is None else box_size
     g = create_element('<g class="legend"></g>')
     svg.append(g)
-    rstyle = {"stroke-width": 2, "stroke": "black"}
+    rstyle = {"stroke-width": 2, "stroke": text_color}
     tstyle = {
         "opacity": opacity,
         "font-family": font_family,
         "font-size": f"{font_size}px",
+        "fill": text_color,
     }
     tstyle = {**attrib, **tstyle}
     if inline:

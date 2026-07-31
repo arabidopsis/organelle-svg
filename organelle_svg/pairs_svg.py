@@ -46,6 +46,8 @@ class Chromosome:
         title: str | None = None,
         units: int = 1000,
         genome: str | None = None,
+        stroke: str = "grey",
+        text_color: str = "grey",
     ):
         self.rec = rec
         self.start = start
@@ -56,6 +58,8 @@ class Chromosome:
         self.genome = genome
         self.title_ = title or self.rec.id or ""
         self.radius = radius
+        self.stroke = stroke
+        self.text_color = text_color
 
         def get_angle(base: float) -> float:
             return base * (end - start) / len(rec) + start
@@ -69,7 +73,7 @@ class Chromosome:
         tick_info: dict[str, Any] | None = None,
         **attrib: Any,
     ) -> None:
-        attrib = {**dict(stroke="grey", opacity=1, fill="grey"), **attrib}
+        attrib = {**dict(stroke=self.stroke, opacity=1, fill=self.stroke), **attrib}
         r = self.r
         ticks(
             len(self.rec),
@@ -101,6 +105,7 @@ class Chromosome:
                 radius=self.radius,
                 offset=0.1,
                 dp=0.05,
+                text_color=self.text_color,
                 **attr,
             )
             g.append(txt)
@@ -135,7 +140,7 @@ class Chromosome:
                 self.start,
                 self.end,
                 fill=None,
-                stroke="grey",
+                stroke=self.stroke,
                 stroke_width=r(1 / self.radius),
             ),
         )
@@ -234,7 +239,6 @@ def do_links(
 
 class PairsDraw(BaseDraw):
     class_prefix = "pairs"
-    ribbon_attrs = dict(stroke="grey", fill="pink", opacity=0.1)
 
     def __init__(
         self,
@@ -245,9 +249,20 @@ class PairsDraw(BaseDraw):
     ):
         super().__init__(**kwargs)
 
+        self.ribbon_attrs = dict(stroke=self.colors.stroke, fill="pink", opacity=0.1)
+
         self.genome = self.genome or self.genome_info_class().genome(rec0)
 
-        chr1 = Chromosome(rec0, self.r, -80, 80, radius=self.radius, genome=self.genome)
+        chr1 = Chromosome(
+            rec0,
+            self.r,
+            -80,
+            80,
+            radius=self.radius,
+            genome=self.genome,
+            stroke=self.colors.stroke,
+            text_color=self.colors.text_color,
+        )
         chr2 = Chromosome(
             rec1,
             self.r,
@@ -256,6 +271,8 @@ class PairsDraw(BaseDraw):
             radius=self.radius,
             title=title,
             genome=self.genome,
+            stroke=self.colors.stroke,
+            text_color=self.colors.text_color,
         )
 
         self.chr1 = chr1
@@ -311,7 +328,6 @@ class PairsDraw(BaseDraw):
         attr = self.merge_attr(attrib, **self.ribbon_attrs)
         do_links(chr1, chr2, r(0.75), g, r, **attr)
         attrib.pop("fill", None)
-        # g.append(circle(0, 0, r(0.5), fill=None, stroke="black"))
         g.append(arc(r(0.5), -80, 80, fill=None, **attrib))
         g.append(arc(r(0.5), 260, 100, fill=None, **attrib))
 
