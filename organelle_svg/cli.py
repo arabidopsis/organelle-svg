@@ -121,17 +121,17 @@ def single(
     pretty_print: bool,
 ) -> None:
     """Generate SVG from a genbank or gff file"""
-    from .api import OGDraw, DepthDraw, GCOGDraw, ColorScheme
+    from .api import OGDraw, DepthDraw, GCOGDraw, DrawStyle
 
-    colors = ColorScheme(bg=bg_color)
+    style = DrawStyle(bg=bg_color)
 
     rec = readit(gb_or_gff)
     if plot_type == "ogdraw":
-        draw = OGDraw(rec, irscan=True, rotate_image=rotate_image, colors=colors)
+        draw = OGDraw(rec, irscan=True, rotate_image=rotate_image, style=style)
     elif plot_type == "gc":
-        draw = GCOGDraw(rec, irscan=True, rotate_image=rotate_image, colors=colors)
+        draw = GCOGDraw(rec, irscan=True, rotate_image=rotate_image, style=style)
     else:
-        draw = DepthDraw(rec, irscan=True, rotate_image=rotate_image, colors=colors)
+        draw = DepthDraw(rec, irscan=True, rotate_image=rotate_image, style=style)
 
     svg = draw.to_string(pretty_print=pretty_print)
     out(output, svg)
@@ -158,9 +158,9 @@ def pairs(
     pretty_print: bool,
 ) -> None:
     """Generate SVG from pairs of genbank or gff files"""
-    from .api import NormalDraw, PairsDraw, BaseDraw, ColorScheme
+    from .api import NormalDraw, PairsDraw, BaseDraw, DrawStyle
 
-    colors = ColorScheme(bg=bg_color)
+    style = DrawStyle(bg=bg_color)
     draw: BaseDraw
 
     rec_in = readit(gb_or_gff_inside)
@@ -171,7 +171,7 @@ def pairs(
             rec_out,
             irscan=True,
             rotate_image=rotate_image,
-            colors=colors,
+            style=style,
         )
     else:
         draw = PairsDraw(
@@ -179,7 +179,7 @@ def pairs(
             rec_out,
             irscan=True,
             rotate_image=rotate_image,
-            colors=colors,
+            style=style,
         )
 
     svg = draw.to_string(pretty_print=pretty_print)
@@ -207,9 +207,9 @@ def stacked(
     pretty_print: bool,
 ) -> None:
     """Generate SVG from a list of genbank or gff files"""
-    from .api import StackedDraw, ColorScheme
+    from .api import StackedDraw, DrawStyle
 
-    colors = ColorScheme(bg=bg_color)
+    style = DrawStyle(bg=bg_color)
     recs = [readit(f) for f in gb_or_gff]
 
     draw = StackedDraw(
@@ -217,7 +217,7 @@ def stacked(
         recs,
         irscan=True,
         rotate_image=rotate_image,
-        colors=colors,
+        style=style,
     )
 
     svg = draw.to_string(pretty_print=pretty_print)

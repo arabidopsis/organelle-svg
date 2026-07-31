@@ -59,7 +59,7 @@ class StackedDraw(BaseDraw):
         tloc = self.r(self.tick_loc)
         dr = self.r(self.dr)
         g = group(klass="ticks")
-        stroke = self.colors.stroke
+        stroke = self.style.stroke
 
         ticks(
             self.N,
@@ -121,7 +121,7 @@ class StackedDraw(BaseDraw):
         get_angle, r, colorf = self.get_angle, self.r, self.colorf
         dr = r(self.dr)
 
-        stroke = self.colors.stroke
+        stroke = self.style.stroke
 
         g = group(klass="band")
 

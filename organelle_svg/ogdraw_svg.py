@@ -502,7 +502,7 @@ class AttrMerger:
         )
 
 @dataclass(kw_only=True)
-class ColorScheme:
+class DrawStyle:
     bg: str = "black"
     stroke: str = "grey"
     stroke_circles: str = "grey"
@@ -519,7 +519,7 @@ class BaseDrawArgs(TypedDict, total=False):
     irscan: bool | IRScan | None
     rotate_image: bool
     show_ticks: bool
-    colors: ColorScheme
+    style: DrawStyle | None
     attrib: dict[str, Any]
 
 
@@ -543,7 +543,7 @@ class BaseDraw(AttrMerger, abc.ABC):
         opacity: float = 1.0,
         irscan: bool | IRScan | None = True,
         rotate_image: bool = False,
-        colors: ColorScheme | None = None,
+        style: DrawStyle | None = None,
         show_ticks: bool = True,
         attrib: dict[str, Any] | None = None,
     ):
@@ -555,7 +555,7 @@ class BaseDraw(AttrMerger, abc.ABC):
             irscan = None
 
         self.radius = radius
-        self.colors = colors or ColorScheme()
+        self.style = style or DrawStyle()
         self.show_ticks = show_ticks
         self.subfeatures = subfeatures
         self.scale = scale
@@ -568,15 +568,15 @@ class BaseDraw(AttrMerger, abc.ABC):
         r = maker(radius * scale)
         # svg = create_svg(radius)
         svg = svge(2 * radius)
-        if self.colors.bg and self.colors.bg != "none":
-            svg.append(rect(0, 0, 2 * radius, fill=self.colors.bg, opacity=opacity, klass="bg"))
+        if self.style.bg and self.style.bg != "none":
+            svg.append(rect(0, 0, 2 * radius, fill=self.style.bg, opacity=opacity, klass="bg"))
 
         # effective font width in degrees....
 
         self.fs = scale * pi * radius / 180.0
         self.svg = svg
         self.r = r
-        self.sw = r(1 / self.radius) if self.colors.stroke != "none" else 0
+        self.sw = r(1 / self.radius) if self.style.stroke != "none" else 0
         self.irscan_width = r(6 / self.radius)
         self.reinit()
 
@@ -659,14 +659,14 @@ class BaseDraw(AttrMerger, abc.ABC):
             center_text.append(
                 (
                     f"rotated {self.rotate_image_angle:,} bp",
-                    {"font-size": str(25 * r), "color": self.colors.text_color},
+                    {"font-size": str(25 * r), "color": self.style.text_color},
                 ),
             )
 
         attrib = {
             "opacity": 1.0,
             "font_size": 45 * r,
-            "color": self.colors.text_color,
+            "color": self.style.text_color,
             **attrib,
         }
 
@@ -693,7 +693,7 @@ class BaseDraw(AttrMerger, abc.ABC):
             height=width,
             inline=True,
             box_size=20 * r,
-            text_color=self.colors.text_color,
+            text_color=self.style.text_color,
         )
 
     def get_IR(self, rec: SeqRecord) -> IRScanResult | None:
@@ -743,7 +743,7 @@ class BaseDraw(AttrMerger, abc.ABC):
     ) -> None:
         r, g = self.r, self.g
         loc = self.get_tick_pos()
-        stroke = self.colors.stroke
+        stroke = self.style.stroke
 
         attrib = self.merge_attr(
             attrib,
@@ -800,7 +800,7 @@ class BaseDraw(AttrMerger, abc.ABC):
                 get_angle=get_angle,
                 scan_width=self.irscan_width,
                 swapped=self.ir_swapped,
-                text_color=self.colors.text_color,
+                text_color=self.style.text_color,
                 **attrib,
             ),
         )
@@ -822,12 +822,12 @@ class BaseDraw(AttrMerger, abc.ABC):
 
         r = self.r
         g = group(klass="sff")
-        stroke = self.colors.stroke
+        stroke = self.style.stroke
         cattr = dict(fill=None, stroke_width=sw, stroke=stroke)
         g.append(circle(0, 0, pos, **cattr))
         attrib = self.merge_attr(
             attrib,
-            background=self.colors.gc_background,  # , opacity=self.opacity
+            background=self.style.gc_background,  # , opacity=self.opacity
         )
         attrib.pop("fill", None)
         depth_histogram(
@@ -863,8 +863,8 @@ class BaseDraw(AttrMerger, abc.ABC):
             return
         attrib = self.merge_attr(
             attrib,
-            background=self.colors.gc_background,
-            fill=self.colors.stroke,
+            background=self.style.gc_background,
+            fill=self.style.stroke,
             opacity=self.opacity,
             inverted=False,
         )
@@ -960,7 +960,7 @@ class OGDraw(BaseDraw):
         tattr = self.merge_attr(
             attrib,
             stroke_width=sw,
-            stroke=self.colors.stroke,
+            stroke=self.style.stroke,
             offset=30 / 1000,
             dp=7 / 1000,
             opacity=1.0,
@@ -979,7 +979,7 @@ class OGDraw(BaseDraw):
                     r,
                     radius=self.radius,
                     outside=True,
-                    text_color=self.colors.text_color,
+                    text_color=self.style.text_color,
                     **tattr,
                 ),
             )
@@ -992,7 +992,7 @@ class OGDraw(BaseDraw):
                     r,
                     radius=self.radius,
                     outside=False,
-                    text_color=self.colors.text_color,
+                    text_color=self.style.text_color,
                     **tattr,
                 ),
             )
@@ -1002,7 +1002,7 @@ class OGDraw(BaseDraw):
                 0,
                 0,
                 r0 - r(0.1),
-                stroke=self.colors.stroke_circles,
+                stroke=self.style.stroke_circles,
                 klass="band-path",
                 fill=None,
                 stroke_width=3 * sw,
@@ -1012,7 +1012,7 @@ class OGDraw(BaseDraw):
         battr = self.merge_attr(
             attrib,
             stroke_width=sw,
-            stroke=self.colors.stroke_circles,
+            stroke=self.style.stroke_circles,
             offset=30 / 1000,
             dp=7 / 1000,
             opacity=1.0,
@@ -1038,7 +1038,7 @@ class OGDraw(BaseDraw):
         self.base_doirscan(self.rec, self.get_angle, **attrib)
 
     def postscript(self, **attrib: Any) -> None:
-        aa = {"stroke": self.colors.stroke_circles, **attrib}
+        aa = {"stroke": self.style.stroke_circles, **attrib}
         self.doirscan(**aa)
         # put bling ontop
         self.svg.append(self.g)

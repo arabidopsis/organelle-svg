@@ -5,7 +5,7 @@ from .normal_svg import NormalDraw
 from .ogdraw_svg import BaseDraw
 from .ogdraw_svg import DepthDraw
 from .ogdraw_svg import GCOGDraw
-from .ogdraw_svg import OGDraw, ColorScheme
+from .ogdraw_svg import OGDraw, DrawStyle
 from .pairs_svg import PairsDraw
 from .stacked_svg import StackedDraw
 from .svg import savesvg
@@ -24,5 +24,5 @@ __all__ = [
     "savesvg",
     "tostring",
     "RenderTips",
-    "ColorScheme",
+    "DrawStyle",
 ]

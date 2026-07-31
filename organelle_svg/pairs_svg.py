@@ -249,7 +249,7 @@ class PairsDraw(BaseDraw):
     ):
         super().__init__(**kwargs)
 
-        self.ribbon_attrs = dict(stroke=self.colors.stroke, fill="pink", opacity=0.1)
+        self.ribbon_attrs = dict(stroke=self.style.stroke, fill="pink", opacity=0.1)
 
         self.genome = self.genome or self.genome_info_class().genome(rec0)
 
@@ -260,8 +260,8 @@ class PairsDraw(BaseDraw):
             80,
             radius=self.radius,
             genome=self.genome,
-            stroke=self.colors.stroke,
-            text_color=self.colors.text_color,
+            stroke=self.style.stroke,
+            text_color=self.style.text_color,
         )
         chr2 = Chromosome(
             rec1,
@@ -271,8 +271,8 @@ class PairsDraw(BaseDraw):
             radius=self.radius,
             title=title,
             genome=self.genome,
-            stroke=self.colors.stroke,
-            text_color=self.colors.text_color,
+            stroke=self.style.stroke,
+            text_color=self.style.text_color,
         )
 
         self.chr1 = chr1
