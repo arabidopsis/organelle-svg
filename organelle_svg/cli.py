@@ -3,8 +3,10 @@ from __future__ import annotations
 import gzip
 from pathlib import Path
 from typing import TYPE_CHECKING
-
+from functools import wraps
 import click
+
+from organelle_svg.ogdraw_svg import DrawStyle
 
 CHLOE = "Chloë"
 
@@ -44,15 +46,53 @@ def readit(gb_or_sff: str) -> SeqRecord:
     return rec
 
 
-def all_options(func):
-    func = click.option(
+def style_options(func):
+    from .api import DrawStyle
+    @wraps(func)
+    @click.option(
         "-b",
         "--bg",
-        "bg_color",
         default="white",
         help='background color (use "none" for no background)',
         show_default=True,
-    )(func)
+    )
+    @click.option(
+        "-c",
+        "--stroke-circles",
+        default="grey",
+        help="stroke color for bands and IRA/IRB circles",
+        show_default=True,
+    )
+    @click.option(
+        "-s",
+        "--stroke",
+        default="grey",
+        help="stroke color for radial lines",
+        show_default=True,
+    )
+    @click.option(
+        "-t",
+        "--text-color",
+        "text_color",
+        default="black",
+        help="text color for gene names and labels",
+        show_default=True,
+    )
+
+    def style_options_inner(
+        bg: str, text_color: str, stroke_circles: str, stroke: str, **kwargs
+    ):
+        style = DrawStyle(
+            bg=bg, text_color=text_color, stroke_circles=stroke_circles, stroke=stroke
+        )
+        kwargs["style"] = style
+
+        return func(**kwargs)
+
+    return style_options_inner
+
+
+def all_options(func):
     func = click.option(
         "-o",
         "--output",
@@ -60,7 +100,6 @@ def all_options(func):
         help="Output SVG file name (default: stdout)",
     )(func)
     func = click.option(
-        "-p",
         "--pretty",
         "pretty_print",
         is_flag=True,
@@ -89,7 +128,6 @@ def out(output: str | None, svg: str) -> None:
 
 def plot_type(choices: list[str]):
     return click.option(
-        "-t",
         "--type",
         "plot_type",
         default=choices[0],
@@ -112,18 +150,18 @@ def cli() -> None:
     "gb_or_gff",
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
+@style_options
 def single(
     gb_or_gff: str,
     plot_type: str,
     output: str | None,
-    bg_color: str,
+    style: DrawStyle,
     rotate_image: bool,
     pretty_print: bool,
 ) -> None:
     """Generate SVG from a genbank or gff file"""
-    from .api import OGDraw, DepthDraw, GCOGDraw, DrawStyle
+    from .api import OGDraw, DepthDraw, GCOGDraw
 
-    style = DrawStyle(bg=bg_color)
 
     rec = readit(gb_or_gff)
     if plot_type == "ogdraw":
@@ -148,19 +186,19 @@ def single(
     "gb_or_gff_outside",
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
 )
+@style_options
 def pairs(
     gb_or_gff_inside: str,
     gb_or_gff_outside: str,
     plot_type: str,
     output: str | None,
-    bg_color: str,
+    style: DrawStyle,
     rotate_image: bool,
     pretty_print: bool,
 ) -> None:
     """Generate SVG from pairs of genbank or gff files"""
-    from .api import NormalDraw, PairsDraw, BaseDraw, DrawStyle
+    from .api import NormalDraw, PairsDraw, BaseDraw
 
-    style = DrawStyle(bg=bg_color)
     draw: BaseDraw
 
     rec_in = readit(gb_or_gff_inside)
@@ -192,6 +230,7 @@ def pairs(
     "--name",
     help="name for svg file",
 )
+@style_options
 @click.argument(
     "gb_or_gff",
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
@@ -202,14 +241,14 @@ def stacked(
     gb_or_gff: list[str],
     name: str | None,
     output: str | None,
-    bg_color: str,
+    style: DrawStyle,
     rotate_image: bool,
     pretty_print: bool,
 ) -> None:
     """Generate SVG from a list of genbank or gff files"""
-    from .api import StackedDraw, DrawStyle
+    from .api import StackedDraw
 
-    style = DrawStyle(bg=bg_color)
+
     recs = [readit(f) for f in gb_or_gff]
 
     draw = StackedDraw(

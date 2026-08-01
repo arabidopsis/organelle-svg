@@ -503,10 +503,10 @@ class AttrMerger:
 
 @dataclass(kw_only=True)
 class DrawStyle:
-    bg: str = "black"
+    bg: str = "white"
     stroke: str = "grey"
     stroke_circles: str = "grey"
-    text_color: str = "orange"
+    text_color: str = "grey"
     gc_background: str = "none"
 
 
@@ -525,7 +525,7 @@ class BaseDrawArgs(TypedDict, total=False):
 
 class BaseDraw(AttrMerger, abc.ABC):
     styles_to_classes: bool = True
-    gc_pos: float = 0.38
+    gc_pos: float = 0.34
     gc_width: float = 0.075
     show_id: bool = False
     class_prefix: str = "cls"
