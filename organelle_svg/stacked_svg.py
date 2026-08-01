@@ -69,7 +69,7 @@ class StackedDraw(BaseDraw):
             get_angle=self.get_angle,
             stroke=stroke,
             grid=(tloc - dr / 2, self.r(0.3)),
-            grid_opacity=0.4,
+            grid_opacity=self.style.grid_opacity,
             font_size=self.r(0.03),
             opacity=0.5,
             # text_fill="#ffffff",

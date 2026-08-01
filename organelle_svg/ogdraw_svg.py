@@ -505,6 +505,7 @@ class AttrMerger:
 class DrawStyle:
     bg: str = "white"
     stroke: str = "grey"
+    grid_opacity: float = 0.4
     stroke_circles: str = "grey"
     text_color: str = "grey"
     gc_background: str = "none"
@@ -663,6 +664,7 @@ class BaseDraw(AttrMerger, abc.ABC):
                 ),
             )
 
+        center_text = self.process_center_text(center_text)
         attrib = {
             "opacity": 1.0,
             "font_size": 45 * r,
@@ -680,6 +682,9 @@ class BaseDraw(AttrMerger, abc.ABC):
             **attrib,
         )
         return genome
+
+    def process_center_text(self, center_text: TEXT_TYPE) -> TEXT_TYPE:
+        return center_text
 
     def add_legend_colors(self, genome: str) -> None:
         width = 2 * self.radius
@@ -749,7 +754,7 @@ class BaseDraw(AttrMerger, abc.ABC):
             attrib,
             opacity=1,
             fill=stroke,
-            grid_opacity=0.4,
+            grid_opacity=self.style.grid_opacity,
             stroke=stroke,
         )
         g2 = ticks(
@@ -901,12 +906,12 @@ class BaseDraw(AttrMerger, abc.ABC):
 
 
 class OGDraw(BaseDraw):
-    show_span = False
     class_prefix = "ogdraw"
 
     def __init__(
         self,
         rec: SeqRecord,
+        show_span: bool = False,
         **kwargs: Unpack[BaseDrawArgs],
     ):
         super().__init__(**kwargs)
@@ -930,6 +935,7 @@ class OGDraw(BaseDraw):
         self.get_tick_angle = get_tick_angle
         self.rotate_image_angle = rot
         self.ir_swapped = ir_swapped
+        self.show_span = show_span
 
     def draw_rec(self, **attrib: Any) -> None:
         g, r, get_angle, rec, fs = self.g, self.r, self.get_angle, self.rec, self.fs

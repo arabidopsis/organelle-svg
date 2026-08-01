@@ -167,10 +167,10 @@ def single(
     no_legend: bool
 ) -> None:
     """Generate SVG from a genbank or gff file"""
-    from .api import OGDraw, DepthDraw, GCOGDraw
+    from .api import OGDraw, DepthDraw, GCOGDraw, BaseDraw
 
     if no_legend:
-        OGDraw.add_legend = False  
+        BaseDraw.add_legend = False
 
     rec = readit(gb_or_gff)
     if plot_type == "ogdraw":
@@ -207,9 +207,9 @@ def pairs(
     no_legend: bool
 ) -> None:
     """Generate SVG from pairs of genbank or gff files"""
-    from .api import NormalDraw, PairsDraw, BaseDraw, OGDraw
+    from .api import NormalDraw, PairsDraw, BaseDraw
     if no_legend:
-        OGDraw.add_legend = False 
+        BaseDraw.add_legend = False
     draw: BaseDraw
 
     rec_in = readit(gb_or_gff_inside)
@@ -258,9 +258,9 @@ def stacked(
     no_legend: bool
 ) -> None:
     """Generate SVG from a list of genbank or gff files"""
-    from .api import StackedDraw, OGDraw
+    from .api import StackedDraw, BaseDraw
     if no_legend:
-        OGDraw.add_legend = False
+        BaseDraw.add_legend = False
 
 
     recs = [readit(f) for f in gb_or_gff]
