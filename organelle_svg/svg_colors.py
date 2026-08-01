@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime
 from datetime import timezone
 from typing import TYPE_CHECKING
@@ -36,12 +35,6 @@ def colorer(genome: str, *, by: PatternKeys = "pattern") -> Callable[[str], str]
         return f"rgb{a}({','.join(str(s) for s in c)})"
 
     return color
-
-
-@dataclass
-class RenderTips:
-    show_legend: bool = True
-    show_center_text: bool = True
 
 
 class GenomeInfo:

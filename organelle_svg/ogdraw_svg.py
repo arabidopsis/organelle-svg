@@ -521,6 +521,7 @@ class BaseDrawArgs(TypedDict, total=False):
     rotate_image: bool
     show_ticks: bool
     style: DrawStyle | None
+    gc_histogram: bool
     attrib: dict[str, Any]
 
 
@@ -546,6 +547,7 @@ class BaseDraw(AttrMerger, abc.ABC):
         rotate_image: bool = False,
         style: DrawStyle | None = None,
         show_ticks: bool = True,
+        gc_histogram: bool = True,
         attrib: dict[str, Any] | None = None,
     ):
         super().__init__(**(attrib or {}))
@@ -565,6 +567,7 @@ class BaseDraw(AttrMerger, abc.ABC):
         self.genome = genome
         self.rotate_image = rotate_image
         self.rotate_image_angle = 0
+        self.gc_histogram = gc_histogram
 
         r = maker(radius * scale)
         # svg = create_svg(radius)
@@ -864,7 +867,7 @@ class BaseDraw(AttrMerger, abc.ABC):
         get_angle: Callable[[int], float],
         **attrib: Any,
     ) -> None:
-        if not self.has_seq(rec):
+        if not self.has_seq(rec) or not self.gc_histogram:
             return
         attrib = self.merge_attr(
             attrib,
@@ -1050,6 +1053,9 @@ class OGDraw(BaseDraw):
         self.svg.append(self.g)
         self.add_bling(self.rec, **attrib)
 
+    def dc_hist(self, **attrib: Any) -> None:
+        self.do_gc_histogram(self.rec, self.get_angle, **attrib)
+
     def extra(self, **attrib: Any) -> None:
         pass
 
@@ -1061,6 +1067,7 @@ class OGDraw(BaseDraw):
         if self.show_ticks:
             self.ticks(**attrib)
         self.draw_rec(**attrib)
+        self.dc_hist(**attrib)
         self.extra(**attrib)
         self.postscript(**attrib)
         if self.styles_to_classes:
@@ -1068,13 +1075,9 @@ class OGDraw(BaseDraw):
         return self.svg
 
 
-class GCOGDraw(OGDraw):
-    @override
-    def extra(self, **attrib: Any) -> None:
-        self.do_gc_histogram(self.rec, self.get_angle, **attrib)
 
 
-class DepthDraw(GCOGDraw):
+class DepthDraw(OGDraw):
     histogram_colors = HISTOGRAM_COLORS
 
     @override

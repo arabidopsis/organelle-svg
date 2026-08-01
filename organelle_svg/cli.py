@@ -151,7 +151,7 @@ def cli() -> None:
 
 @cli.command()
 @all_options
-@plot_type(["ogdraw", "gc", "depth"])
+@plot_type(["ogdraw", "depth"])
 @click.argument(
     "gb_or_gff",
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
@@ -167,7 +167,7 @@ def single(
     no_legend: bool
 ) -> None:
     """Generate SVG from a genbank or gff file"""
-    from .api import OGDraw, DepthDraw, GCOGDraw, BaseDraw
+    from .api import OGDraw, DepthDraw, BaseDraw
 
     if no_legend:
         BaseDraw.add_legend = False
@@ -175,8 +175,6 @@ def single(
     rec = readit(gb_or_gff)
     if plot_type == "ogdraw":
         draw = OGDraw(rec, irscan=True, rotate_image=rotate_image, style=style)
-    elif plot_type == "gc":
-        draw = GCOGDraw(rec, irscan=True, rotate_image=rotate_image, style=style)
     else:
         draw = DepthDraw(rec, irscan=True, rotate_image=rotate_image, style=style)
 
