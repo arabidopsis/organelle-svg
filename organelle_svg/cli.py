@@ -6,13 +6,13 @@ from typing import TYPE_CHECKING
 from functools import wraps
 import click
 
-from organelle_svg.ogdraw_svg import DrawStyle
 
 CHLOE = "Chloë"
 
 
 if TYPE_CHECKING:
     from Bio.SeqRecord import SeqRecord
+    from .api import DrawStyle
 
 
 def read_rec(fname: str | Path, rec_type: str) -> SeqRecord:
@@ -112,7 +112,13 @@ def all_options(func):
         is_flag=True,
         help="rotate the image so IR is at start of the circle (if present)",
     )(func)
-
+    func = click.option(
+        "--no-legend",
+        "no_legend",
+        is_flag=True,
+        default=False,
+        help="do not add legend",
+    )(func)
     return func
 
 
@@ -158,10 +164,13 @@ def single(
     style: DrawStyle,
     rotate_image: bool,
     pretty_print: bool,
+    no_legend: bool
 ) -> None:
     """Generate SVG from a genbank or gff file"""
     from .api import OGDraw, DepthDraw, GCOGDraw
 
+    if no_legend:
+        OGDraw.add_legend = False  
 
     rec = readit(gb_or_gff)
     if plot_type == "ogdraw":
@@ -195,10 +204,12 @@ def pairs(
     style: DrawStyle,
     rotate_image: bool,
     pretty_print: bool,
+    no_legend: bool
 ) -> None:
     """Generate SVG from pairs of genbank or gff files"""
-    from .api import NormalDraw, PairsDraw, BaseDraw
-
+    from .api import NormalDraw, PairsDraw, BaseDraw, OGDraw
+    if no_legend:
+        OGDraw.add_legend = False 
     draw: BaseDraw
 
     rec_in = readit(gb_or_gff_inside)
@@ -244,9 +255,12 @@ def stacked(
     style: DrawStyle,
     rotate_image: bool,
     pretty_print: bool,
+    no_legend: bool
 ) -> None:
     """Generate SVG from a list of genbank or gff files"""
-    from .api import StackedDraw
+    from .api import StackedDraw, OGDraw
+    if no_legend:
+        OGDraw.add_legend = False
 
 
     recs = [readit(f) for f in gb_or_gff]
