@@ -577,6 +577,11 @@ def hist(
     g = group(klass=klass(attrib, None))
     if background and background != "none":
         g.append(path(d=annular_path(0, 0, pos, r(1)), fill=background, opacity=0.6))
+    else:
+        stroke = attrib.get("fill", "grey")
+        g.append(
+            path(d=annular_path(0, 0, pos, r(1)), fill=None, stroke_width=r(0.02), stroke=stroke)
+        )
     rr = pos + (r(0.5) if offset else 0)
     if offset:
         g.append(circle(0, 0, rr, fill=None, stroke="white", stroke_width=r(0.02)))
