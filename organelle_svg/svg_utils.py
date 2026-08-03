@@ -401,8 +401,7 @@ def annular(x: float, y: float, r: float, dr: float) -> str:
 def annular_path(x: float, y: float, r: float, dr: float) -> str:
     # simpler without sin cosine comp
     o = r + dr
-    return f"""M {x:.4f},{y - o:.4f} A{o:.4f},{o:.4f} 0 1,1 {x - 0.001:.4f},{y - o:.4f} z
-               M {x:.4f},{y + r:.4f} A{r:.4f},{r:.4f} 0 1,0 {x - 0.001:.4f},{y + r:.4f} z"""
+    return f"""M {x:.4f},{y - o:.4f} A{o:.4f},{o:.4f} 0 1,1 {x - 0.001:.4f},{y - o:.4f} z M {x:.4f},{y + r:.4f} A{r:.4f},{r:.4f} 0 1,0 {x - 0.001:.4f},{y + r:.4f} z"""
 
 
 def svge(width: int, height: int | None = None, **attrib: Any) -> Element:
