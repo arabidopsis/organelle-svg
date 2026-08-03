@@ -874,7 +874,6 @@ class BaseDraw(AttrMerger, abc.ABC):
             background=self.style.gc_background,
             fill=self.style.stroke,
             opacity=self.opacity,
-            inverted=False,
         )
         g = self.g
         pos, gcw = self.get_gc_pos()
@@ -884,6 +883,8 @@ class BaseDraw(AttrMerger, abc.ABC):
             r0=pos,
             r=maker(gcw),
             get_angle=get_angle,
+            inverted=False,
+            offset=False,
             **attrib,
         )
 

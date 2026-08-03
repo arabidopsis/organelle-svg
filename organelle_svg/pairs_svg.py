@@ -291,7 +291,7 @@ class PairsDraw(BaseDraw):
         tick_pos = self.get_tick_pos()
         attrib = self.merge_attr(
             attrib,
-            stroke="black",
+            stroke=self.style.stroke,
             stroke_width=r(2 / self.radius),
             opacity=1,
         )

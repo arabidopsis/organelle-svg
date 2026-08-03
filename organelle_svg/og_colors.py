@@ -55,6 +55,7 @@ class Colour(TypedDict):
     fullname: str
     drawflag: bool
 
+    
 
 PatternKeys: TypeAlias = Literal["type", "pattern"]
 
