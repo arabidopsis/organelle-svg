@@ -251,7 +251,7 @@ class PairsDraw(BaseDraw):
 
         self.ribbon_attrs = dict(stroke=self.style.stroke, fill="pink", opacity=0.1)
 
-        self.genome = self.genome or self.genome_info_class().genome(rec0)
+        self.genome = self.genome or self.get_genome_type(rec0)
 
         chr1 = Chromosome(
             rec0,

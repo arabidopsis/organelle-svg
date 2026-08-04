@@ -143,7 +143,7 @@ def add_legend(
     return svg
 
 
-TEXT_TYPE: TypeAlias = list[str | tuple[str, Any]]
+TEXT_TYPE: TypeAlias = list[str | tuple[str, dict[str, Any]]]
 
 
 def add_center_text(

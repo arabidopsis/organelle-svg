@@ -64,7 +64,7 @@ class NormalDraw(BaseDraw):
         def get_tick_angle(p: float) -> float:
             return (N - p) * 360 / N
 
-        self.genome = self.genome or self.genome_info_class().genome(rec0)
+        self.genome = self.genome or self.get_genome_type(rec0)
         assert self.genome is not None
         self.rec0 = rec0
         self.rec1 = rec1
@@ -273,7 +273,9 @@ class NormalDraw(BaseDraw):
 
 
 class NCBINormalDraw(NormalDraw):
-    def center_text_list(self, rec: SeqRecord) -> tuple[TEXT_TYPE, str]:
-        a, genome = super().center_text_list(rec)
+    @classmethod
+    @override
+    def center_text_list(cls, rec: SeqRecord, default: str = "chloroplast") -> tuple[TEXT_TYPE, str]:
+        a, genome = super().center_text_list(rec, default=default)
         a.append(("(chloe annotation is outer ring)", dict(font_size=30)))
         return a, genome
