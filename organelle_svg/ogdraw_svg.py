@@ -795,7 +795,7 @@ class BaseDraw(AttrMerger, abc.ABC):
 
         ir = self.get_IR(rec)
         if ir is None and self.irscan and has_seq:
-            ir = self.irscan.doirscan(str(rec.id), rec.seq)
+            ir = self.irscan.doirscan(rec.seq)
         if ir is None:
             return None
 

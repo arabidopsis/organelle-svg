@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
-    from typing import Any
     from Bio.Seq import MutableSeq
     from Bio.Seq import Seq
 
@@ -127,9 +126,7 @@ class Scanner:
 class IRScan:
     def doirscan(
         self,
-        name: str,
         seq: Seq | MutableSeq | None,
-        **_kwargs: Any,
     ) -> IRScanResult | None:
         if seq is None:
             return None

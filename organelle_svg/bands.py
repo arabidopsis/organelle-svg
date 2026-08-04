@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from Bio.SeqFeature import SeqFeature
 
 
-def sanitize_name(name: str) -> str:
+def sanitize_name_(name: str) -> str:
     # maybe set tab as separator.... `file_delim = \t`
     # no spaces in names (circos files are space separated)
     # but 'NO-BREAK SPACE' (U+00A0) seems to work
@@ -89,7 +89,7 @@ class Band:
         return f"{self.__class__.__name__}({self.name},{self.gene},[{self.start},{self.end}], {self.strand})"
 
 
-def get_range_map(rec: SeqRecord) -> dict[int, intrangeset]:
+def get_range_map_(rec: SeqRecord) -> dict[int, intrangeset]:
     ranges = {1: intrangeset(), -1: intrangeset()}
 
     for _, feat in iter_features(rec):
@@ -104,7 +104,7 @@ def get_range_map(rec: SeqRecord) -> dict[int, intrangeset]:
     return ranges
 
 
-def intron_walker(
+def intron_walker_(
     parts: list[SimpleLocation],
     ranges: dict[int, intrangeset] | None = None,
 ) -> Iterator[tuple[str, SimpleLocation]]:
@@ -141,7 +141,7 @@ def intron_walker(
         prev = end if strand == 1 else (start if strand == -1 else None)
 
 
-def get_bands(
+def get_bands_(
     rec: SeqRecord,
     span: Callable[[Any], Any] | bool = False,
     number_gene: bool = True,
@@ -150,7 +150,7 @@ def get_bands(
 ) -> Iterator[Band]:
     ranges = None
     if introns:
-        ranges = get_range_map(rec)
+        ranges = get_range_map_(rec)
 
     nc: dict[str, int] = Counter()
     found: list[tuple[int, SeqFeature, int]] = []
@@ -171,13 +171,13 @@ def get_bands(
         typ = feat.type
         if "gene" in q:
             gene = q["gene"][0]
-            name = sanitize_name(gene)  # can't have spaces in circos files
+            name = sanitize_name_(gene)  # can't have spaces in circos files
             if number_gene and nc[gene] > 1:
                 name = f"{name}/{count}"
             typ = "gene"
         else:
             gene = rec.name
-            name = sanitize_name(gene)
+            name = sanitize_name_(gene)
             if nc[rec.name] > 1:
                 name = f"{name}/{count}"
                 gene = f"{gene}/{count}"
@@ -186,7 +186,7 @@ def get_bands(
         else:
             assert feat.location is not None
             parts = feat.location.parts
-        for typ, part in intron_walker(parts, ranges):  # type: ignore[arg-type]
+        for typ, part in intron_walker_(parts, ranges):  # type: ignore[arg-type]
             gene_type = typ if typ == "intron" else feat.type
 
             yield BandCls(
@@ -213,9 +213,9 @@ def get_links(
     rec2name_str = rec2name or rec2.id or ""
     b1: dict[str, list[Band]] = defaultdict(list)
     b2: dict[str, list[Band]] = defaultdict(list)
-    for b in get_bands(rec1, span=False, number_gene=True):
+    for b in get_bands_(rec1, span=False, number_gene=True):
         b1[b.name].append(b)
-    for b in get_bands(rec2, span=False, number_gene=True):
+    for b in get_bands_(rec2, span=False, number_gene=True):
         b2[b.name].append(b)
     genes = set(b1) & set(b2)
     minhit: float | None
