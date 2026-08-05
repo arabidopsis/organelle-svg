@@ -1,7 +1,7 @@
 [project]
 name = "organelle-svg"
 version = "0.9.6"
-description = "Generate pictures of Organelle DNA"
+description = "Generate SVG representations of Organelle DNA"
 requires-python = ">=3.12"
 readme = "README.md"
 license = "MIT"
