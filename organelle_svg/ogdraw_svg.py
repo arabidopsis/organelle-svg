@@ -95,6 +95,7 @@ def show_band(
     genome: str,
     get_angle: Callable[[int], float],
     dr: float = 5,
+    stroke: str = "grey",
     show_span: bool = False,
     **attrib: Any,
 ) -> None:
@@ -102,7 +103,7 @@ def show_band(
 
     # N = len(rec)
 
-    getcolor = colorer(genome)
+    getcolor = colorer(genome, by="pattern")
     getcolort = colorer(genome, by="type")
 
     icolor = getcolort("intron")
@@ -139,7 +140,7 @@ def show_band(
     for _, feat in iter_features(rec):
         if feat.location is None:
             continue
-        if feat.type == "intron" and feat.location is not None:
+        if feat.type == "intron":
             g.append(create_glyph("intron", feat.location, icolor))  # type: ignore
         else:
             for part in feat.location.parts:
@@ -173,7 +174,7 @@ def show_band(
                 angle1 = get_angle(start)  # type: ignore
                 angle2 = get_angle(end)  # type: ignore
                 w = dr if feat.location.strand > 0 else -dr
-                a = arc(r0 + w, angle2, angle1, stroke="black", stroke_width=dxx)
+                a = arc(r0 + w, angle2, angle1, stroke=stroke, stroke_width=dxx)
                 g.append(a)
     g2.append(g)
 
@@ -578,7 +579,9 @@ class BaseDraw(AttrMerger, abc.ABC):
         # svg = create_svg(radius)
         svg = svge(2 * radius)
         if self.style.bg and self.style.bg != "none":
-            svg.append(rect(0, 0, 2 * radius, fill=self.style.bg, opacity=opacity, klass="bg"))
+            svg.append(
+                rect(0, 0, 2 * radius, fill=self.style.bg, opacity=opacity, klass="bg")
+            )
 
         # effective font width in degrees....
 
@@ -956,7 +959,9 @@ class BaseDraw(AttrMerger, abc.ABC):
         else:
             tt = [txt]
 
-        text = [genome, *tt, f"{len(rec.seq if rec.seq else ' '):,} bp"]
+        text = [genome, *tt]
+        if rec.seq:
+            text.append(f"{len(rec.seq):,} bp")
 
         patch(text)
 

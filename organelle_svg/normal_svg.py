@@ -204,6 +204,7 @@ class NormalDraw(BaseDraw):
                 genome=self.genome,
                 get_angle=get_angle,
                 dr=dr,
+                stroke=self.style.stroke_circles,
                 **attrib,
             )
 

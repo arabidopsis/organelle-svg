@@ -152,6 +152,7 @@ class Chromosome:
             self.genome,
             get_angle=self.get_angle,
             dr=r(bw),
+            stroke=self.stroke,
             **attrib,
         )
 
