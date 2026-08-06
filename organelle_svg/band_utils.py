@@ -7,11 +7,10 @@ from Bio.Seq import UndefinedSequenceError
 from sortedcontainers import SortedList
 
 if TYPE_CHECKING:
-    from typing import Any
-    from typing import Callable
-    from typing import Iterator
-    from Bio.SeqRecord import SeqRecord
+    from typing import Any, Callable, Iterator
+
     from Bio.SeqFeature import SeqFeature, SimpleLocation
+    from Bio.SeqRecord import SeqRecord
 
 
 def has_seq(rec: SeqRecord) -> bool:

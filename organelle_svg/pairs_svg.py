@@ -24,11 +24,11 @@ from .svg_utils import text_perp
 from .svg_utils import ticks
 
 if TYPE_CHECKING:
-    from typing import Any
-    from typing import Callable
-    from typing import Unpack
+    from typing import Any, Callable, Unpack
     from xml.etree.ElementTree import Element
+
     from Bio.SeqRecord import SeqRecord
+
     from .ogdraw_svg import BaseDrawArgs
 
 

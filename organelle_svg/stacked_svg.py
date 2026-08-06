@@ -15,13 +15,12 @@ from .svg_utils import styles_to_classes
 from .svg_utils import ticks
 
 if TYPE_CHECKING:
-    from typing import Any
-    from typing import Unpack
-    from typing import Iterator
-    from typing import Sequence
+    from typing import Any, Iterator, Sequence, Unpack
     from xml.etree.ElementTree import Element
-    from Bio.SeqRecord import SeqRecord
+
     from Bio.SeqFeature import SeqFeature
+    from Bio.SeqRecord import SeqRecord
+
     from .ogdraw_svg import BaseDrawArgs
 
 

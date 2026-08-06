@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 import gzip
+from functools import wraps
 from pathlib import Path
 from typing import TYPE_CHECKING
-from functools import wraps
-import click
 
+import click
 
 CHLOE = "Chloë"
 
 
 if TYPE_CHECKING:
     from Bio.SeqRecord import SeqRecord
+
     from .api import DrawStyle
 
 
@@ -28,8 +29,9 @@ def read_rec(fname: str | Path, rec_type: str) -> SeqRecord:
 
 
 def readit(gb_or_sff: str) -> SeqRecord:
-    from .bio_sff import readsff
     from BCBio import GFF
+
+    from .bio_sff import readsff
 
     if gb_or_sff.endswith((".sff", ".sff.gz")):
         rec = readsff(gb_or_sff, include_introns=True, expand_features=False)
@@ -48,6 +50,7 @@ def readit(gb_or_sff: str) -> SeqRecord:
 
 def style_options(func):
     from .api import DrawStyle
+
     @wraps(func)
     @click.option(
         "-b",
@@ -78,12 +81,18 @@ def style_options(func):
         help="text color for gene names and labels",
         show_default=True,
     )
-
     def style_options_inner(
-        bg: str, text_color: str, stroke_circles: str, stroke: str, **kwargs
+        bg: str,
+        text_color: str,
+        stroke_circles: str,
+        stroke: str,
+        **kwargs,
     ):
         style = DrawStyle(
-            bg=bg, text_color=text_color, stroke_circles=stroke_circles, stroke=stroke
+            bg=bg,
+            text_color=text_color,
+            stroke_circles=stroke_circles,
+            stroke=stroke,
         )
         kwargs["style"] = style
 
@@ -164,10 +173,10 @@ def single(
     style: DrawStyle,
     rotate_image: bool,
     pretty_print: bool,
-    no_legend: bool
+    no_legend: bool,
 ) -> None:
     """Generate SVG from a genbank or gff file"""
-    from .api import OGDraw, DepthDraw, BaseDraw
+    from .api import BaseDraw, DepthDraw, OGDraw
 
     if no_legend:
         BaseDraw.add_legend = False
@@ -202,10 +211,11 @@ def pairs(
     style: DrawStyle,
     rotate_image: bool,
     pretty_print: bool,
-    no_legend: bool
+    no_legend: bool,
 ) -> None:
     """Generate SVG from pairs of genbank or gff files"""
-    from .api import NormalDraw, PairsDraw, BaseDraw
+    from .api import BaseDraw, NormalDraw, PairsDraw
+
     if no_legend:
         BaseDraw.add_legend = False
     draw: BaseDraw
@@ -253,13 +263,13 @@ def stacked(
     style: DrawStyle,
     rotate_image: bool,
     pretty_print: bool,
-    no_legend: bool
+    no_legend: bool,
 ) -> None:
     """Generate SVG from a list of genbank or gff files"""
-    from .api import StackedDraw, BaseDraw
+    from .api import BaseDraw, StackedDraw
+
     if no_legend:
         BaseDraw.add_legend = False
-
 
     recs = [readit(f) for f in gb_or_gff]
 

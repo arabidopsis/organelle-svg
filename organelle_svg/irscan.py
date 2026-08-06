@@ -3,10 +3,8 @@ from __future__ import annotations
 from typing import NamedTuple
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
-    from Bio.Seq import MutableSeq
-    from Bio.Seq import Seq
+    from Bio.Seq import MutableSeq, Seq
 
 
 class IRScanResult(NamedTuple):

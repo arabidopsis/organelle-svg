@@ -22,11 +22,12 @@ from .svg_utils import styles_to_classes
 from .svg_utils import text_perp
 
 if TYPE_CHECKING:
-    from typing import Any
-    from typing import Unpack
+    from typing import Any, Unpack
+    from xml.etree.ElementTree import Element
+
     from Bio.SeqFeature import SeqFeature
     from Bio.SeqRecord import SeqRecord
-    from xml.etree.ElementTree import Element
+
     from .ogdraw_svg import BaseDrawArgs
     from .svg import TEXT_TYPE
     from .svg_utils import Overlap
@@ -112,7 +113,12 @@ class NormalDraw(BaseDraw):
         inner = circle(0, 0, txt, fill=None, stroke=self.style.stroke, stroke_width=sw)
         g.append(inner)
 
-        attrib = self.merge_attr(attrib, opacity=1, klass="name", stroke=self.style.stroke)
+        attrib = self.merge_attr(
+            attrib,
+            opacity=1,
+            klass="name",
+            stroke=self.style.stroke,
+        )
 
         def dotext(
             strand: Any,
@@ -164,7 +170,14 @@ class NormalDraw(BaseDraw):
         if 1 in datad:  # from strand_key above
             _, pos1, dr = self.get_band_pos()
             g.append(
-                circle(0, 0, pos1 - dr, fill=None, stroke=self.style.stroke, stroke_width=sw),
+                circle(
+                    0,
+                    0,
+                    pos1 - dr,
+                    fill=None,
+                    stroke=self.style.stroke,
+                    stroke_width=sw,
+                ),
             )
             ov: list[Overlap] = datad[1]
             dotext(1, ov, fill="black", outside=False, pos=pos1 - dr)
@@ -276,7 +289,11 @@ class NormalDraw(BaseDraw):
 class NCBINormalDraw(NormalDraw):
     @classmethod
     @override
-    def center_text_list(cls, rec: SeqRecord, default: str = "chloroplast") -> tuple[TEXT_TYPE, str]:
+    def center_text_list(
+        cls,
+        rec: SeqRecord,
+        default: str = "chloroplast",
+    ) -> tuple[TEXT_TYPE, str]:
         a, genome = super().center_text_list(rec, default=default)
         a.append(("(chloe annotation is outer ring)", dict(font_size=30)))
         return a, genome

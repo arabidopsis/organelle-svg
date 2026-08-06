@@ -123,7 +123,7 @@ def readsff(
 LOC: TypeAlias = tuple[str, int, SFFLocation | None]
 
 
-def readsff_fp(  # noqa: C901
+def readsff_fp(
     fp: IO[str],
     skip_negative: bool = False,
     strict: bool = False,

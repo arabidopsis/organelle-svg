@@ -15,11 +15,9 @@ from .band_utils import intrange
 from .band_utils import intrangeset
 from .config import SVG_DEFAULT_FONTS
 
-
 if TYPE_CHECKING:
-    from typing import Any
-    from typing import Callable
-    from typing import Iterable
+    from typing import Any, Callable, Iterable
+
     from .histograms import Hist
 
 RGBA = re.compile(
@@ -579,7 +577,12 @@ def hist(
     else:
         stroke = attrib.get("fill", "grey")
         g.append(
-            path(d=annular_path(0, 0, pos, r(1)), fill=None, stroke_width=r(0.02), stroke=stroke)
+            path(
+                d=annular_path(0, 0, pos, r(1)),
+                fill=None,
+                stroke_width=r(0.02),
+                stroke=stroke,
+            ),
         )
     rr = pos + (r(0.5) if offset else 0)
     if offset:

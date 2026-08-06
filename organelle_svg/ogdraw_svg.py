@@ -3,21 +3,24 @@ from __future__ import annotations
 import abc
 from collections import defaultdict
 from dataclasses import dataclass
+from datetime import datetime
+from datetime import timezone
 from math import pi
 from typing import Any
 from typing import override
 from typing import TYPE_CHECKING
 from typing import TypedDict
-from datetime import datetime, timezone
 
 from .band_utils import has_seq as has_seq_data
 from .band_utils import iter_features
 from .band_utils import Overlapping
+from .config import SOURCE
 from .histograms import coverage_histogram
 from .histograms import depth_histogram
 from .histograms import gc_histogram
 from .irscan import IRScan
 from .irscan import IRScanResult
+from .og_colors import get_colors_for_genome
 from .svg import add_center_text
 from .svg import add_legend
 from .svg import savesvg
@@ -25,7 +28,6 @@ from .svg import tobytes
 from .svg import tostring
 from .svg_colors import colorer
 from .svg_colors import HISTOGRAM_COLORS
-from .og_colors import get_colors_for_genome
 from .svg_utils import arc
 from .svg_utils import circle
 from .svg_utils import fix_text_overlap
@@ -42,21 +44,16 @@ from .svg_utils import text_horz
 from .svg_utils import text_len
 from .svg_utils import text_perp
 from .svg_utils import ticks
-from .config import SOURCE
 
 if TYPE_CHECKING:
-    from typing import Callable
-    from typing import Unpack
-    from typing import Sequence
-    from typing import Iterator
+    from typing import Callable, Iterator, Sequence, Unpack
     from xml.etree.ElementTree import Element
-    from Bio.SeqFeature import SeqFeature
+
+    from Bio.SeqFeature import CompoundLocation, SeqFeature, SimpleLocation
     from Bio.SeqRecord import SeqRecord
-    from Bio.SeqFeature import CompoundLocation
-    from Bio.SeqFeature import SimpleLocation
-    from .svg import TEXT_TYPE
+
     from .band_utils import Overlap as IOverlap
-    from .og_colors import ColourTuple
+    from .svg import TEXT_TYPE
 
 
 def create_band(
@@ -336,7 +333,7 @@ def strandkey(loc: SimpleLocation | CompoundLocation) -> Any:
     return loc.strand
 
 
-def get_gene_names_from_features(  # noqa: C901
+def get_gene_names_from_features(
     features: Sequence[SeqFeature],
     r0: float,
     fs: float,
@@ -505,6 +502,7 @@ class AttrMerger:
             **local_defaults,
         )
 
+
 @dataclass(kw_only=True)
 class DrawStyle:
     bg: str = "white"
@@ -581,7 +579,7 @@ class BaseDraw(AttrMerger, abc.ABC):
         svg = svge(2 * radius)
         if self.style.bg and self.style.bg != "none":
             svg.append(
-                rect(0, 0, 2 * radius, fill=self.style.bg, opacity=opacity, klass="bg")
+                rect(0, 0, 2 * radius, fill=self.style.bg, opacity=opacity, klass="bg"),
             )
 
         # effective font width in degrees....
@@ -617,7 +615,6 @@ class BaseDraw(AttrMerger, abc.ABC):
         rec1: SeqRecord,
     ) -> str | tuple[str, dict[str, str]]:
         return f"({rec1.id or ''})"
-
 
     def add_bling(
         self,
@@ -968,6 +965,7 @@ class BaseDraw(AttrMerger, abc.ABC):
 
         return text, genome
 
+
 class OGDraw(BaseDraw):
     class_prefix = "ogdraw"
 
@@ -1034,7 +1032,6 @@ class OGDraw(BaseDraw):
             dp=7 / 1000,
             opacity=1.0,
             klass="name",
-
         )
 
         show_overlap(g, rec, r0 - r(0.1), r, get_angle, dr=r(0.05), **attrib)
@@ -1133,8 +1130,6 @@ class OGDraw(BaseDraw):
         if self.styles_to_classes:
             styles_to_classes(self.svg, self.class_prefix)
         return self.svg
-
-
 
 
 class DepthDraw(OGDraw):

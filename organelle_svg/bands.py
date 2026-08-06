@@ -11,11 +11,10 @@ from .band_utils import intrangeset
 from .band_utils import iter_features
 
 if TYPE_CHECKING:
-    from typing import Any
-    from typing import Callable
-    from typing import Iterator
-    from Bio.SeqRecord import SeqRecord
+    from typing import Any, Callable, Iterator
+
     from Bio.SeqFeature import SeqFeature
+    from Bio.SeqRecord import SeqRecord
 
 
 def sanitize_name_(name: str) -> str:

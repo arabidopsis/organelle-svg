@@ -7,13 +7,11 @@ from .band_utils import iter_features
 from .svg_utils import hist
 
 if TYPE_CHECKING:
-    from typing import Any
-    from typing import Callable
-    from typing import Iterator
+    from typing import Any, Callable, Iterator
     from xml.etree.ElementTree import Element
+
+    from Bio.SeqFeature import SeqFeature, SimpleLocation
     from Bio.SeqRecord import SeqRecord
-    from Bio.SeqFeature import SeqFeature
-    from Bio.SeqFeature import SimpleLocation
 
 
 def merge_attr(attr: dict[str, Any], **defaults: Any) -> dict[str, Any]:
@@ -177,4 +175,14 @@ def gc_histogram(
 ) -> None:
     attrib = merge_attr(attrib, klass="gc")
     d = gc_hist(rec, span=100)
-    g.append(hist(d, r0, r=r, get_angle=get_angle, inverted=inverted, offset=offset, **attrib))
+    g.append(
+        hist(
+            d,
+            r0,
+            r=r,
+            get_angle=get_angle,
+            inverted=inverted,
+            offset=offset,
+            **attrib,
+        ),
+    )
