@@ -4,20 +4,12 @@ import gzip
 from html import escape as htmlescape
 from io import StringIO
 from pathlib import Path
-from typing import Any
-from typing import cast
-from typing import TYPE_CHECKING
-from typing import TypeAlias
-from xml.etree.ElementTree import Element
-from xml.etree.ElementTree import indent
+from typing import TYPE_CHECKING, Any
+from xml.etree.ElementTree import Element, indent
 from xml.etree.ElementTree import parse as etree_parse
 from xml.etree.ElementTree import tostring as etree_tostring
 
-from .svg_utils import FontFamily
-from .svg_utils import RGB_Type
-from .svg_utils import toattrs
-from .svg_utils import tostyle
-from .svg_utils import tuple_color
+from .svg_utils import FontFamily, toattrs, tostyle
 
 if TYPE_CHECKING:
     from typing import IO
@@ -134,7 +126,7 @@ def add_legend(
     return svg
 
 
-TEXT_TYPE: TypeAlias = list[str | tuple[str, dict[str, Any]]]
+type TEXT_TYPE = list[str | tuple[str, dict[str, Any]]]
 
 
 def add_center_text(
