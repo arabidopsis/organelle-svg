@@ -71,7 +71,7 @@ def savesvg(
 
 def add_legend(
     svg: Element,
-    lines: list[tuple[str, Any]],
+    lines: list[tuple[str, str | None]],
     font_size: float = 30,
     y_offset: float = 10,
     sep: int = 20,
@@ -111,16 +111,7 @@ def add_legend(
             line = htmlescape(line)
         y_pos = height - y_offset - i * font_size - sep
         if color:
-            if isinstance(color, tuple):
-                tx = {
-                    **t1,
-                    **tuple_color(
-                        cast(RGB_Type, color[:3]),
-                        color[4] if len(color) > 3 else None,
-                    ),
-                }
-            else:
-                tx = {**t1, "fill": color}
+            tx = {**t1, "fill": color}
             txs = toattrs(tx)
             e = create_element(
                 f"""<rect x="{left}" y="{y_pos - size}px"

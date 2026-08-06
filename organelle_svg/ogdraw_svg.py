@@ -24,7 +24,8 @@ from .svg import savesvg
 from .svg import tobytes
 from .svg import tostring
 from .svg_colors import colorer
-from .svg_colors import HISTOGRAM_COLORS, get_colors_for_genome
+from .svg_colors import HISTOGRAM_COLORS
+from .og_colors import get_colors_for_genome
 from .svg_utils import arc
 from .svg_utils import circle
 from .svg_utils import fix_text_overlap
@@ -911,11 +912,11 @@ class BaseDraw(AttrMerger, abc.ABC):
         return m.group(1) if m else default
 
     @classmethod
-    def legend_text(cls, typ: str) -> list[tuple[str, ColourTuple | None]]:
-        C = get_colors_for_genome(typ)
+    def legend_text(cls, genome_type: str) -> list[tuple[str, str | None]]:
+        C = get_colors_for_genome(genome_type)
         # name and color as r,g,b as a string
-        lines: list[tuple[str, ColourTuple | None]] = [
-            (r["fullname"], r["color"]) for r in C if r["drawflag"]
+        lines: list[tuple[str, str | None]] = [
+            (r.fullname, r.color_str) for r in C if r.drawflag
         ]
         if cls.whoami:
             tme = datetime.now(tz=cls.TZ)

@@ -1,13 +1,9 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from typing import Literal
 from typing import TypeAlias
-from typing import TypedDict
-
-
-def get_colors_for_genome(genome: str) -> list[Colour]:
-    return Plastome if genome != "mitochondrion" else Chondriome
 
 
 def mregex(s: str) -> re.Pattern[str]:
@@ -48,260 +44,242 @@ vvlgrey = 240, 240, 240  # taken from /circos-colors.html
 ColourTuple: TypeAlias = tuple[int, int, int] | tuple[int, int, int, float]
 
 
-class Colour(TypedDict):
+@dataclass(kw_only=True)
+class GeneColor:
     type: re.Pattern[str]  # gene etc.
     pattern: re.Pattern[str]  # e.g. ^psa.* for photosystem I genes
-    color: ColourTuple
+    color_tuple: ColourTuple
     fullname: str
-    drawflag: bool
+    drawflag: bool = True
 
-    
+    @property
+    def color_str(self) -> str:
+        c = self.color_tuple
+        if len(c) == 3:
+            r, g, b = c
+            return f"#{r:2X}{g:2X}{b:2X}".replace(" ", "0")
+        return f"rgba({','.join(str(s) for s in c)})"
+
 
 PatternKeys: TypeAlias = Literal["type", "pattern"]
 
-Plastome: list[Colour] = [
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^psa.*"),
-        "color": PSA,
-        "fullname": "photosystem I",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^psb.*"),
-        "color": PSB,
-        "fullname": "photosystem II",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^pet.*"),
-        "color": PET,
-        "fullname": "cytochrome b/f complex",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^atp.*"),
-        "color": ATP,
-        "fullname": "ATP synthase",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^ndh.*"),
-        "color": NDH,
-        "fullname": "NADH dehydrogenase",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^rbc[lL].*"),
-        "color": RBCL,
-        "fullname": "RubisCO large subunit",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^rpo.*"),
-        "color": RPO,
-        "fullname": "RNA polymerase",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^rps.*"),
-        "color": RPS,
-        "fullname": "ribosomal proteins (SSU)",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^rpl.*"),
-        "color": RPL,
-        "fullname": "ribosomal proteins (LSU)",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^(clp|mat).*"),
-        "color": CLP,
-        "fullname": "clpP, matK",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^ycf.*"),
-        "color": YCF,
-        "fullname": "hypothetical chloroplast reading frames (ycf)",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("CDS|gene"),
-        "pattern": mregex("^orf.*"),
-        "color": ORF,
-        "fullname": "ORFs",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("tRNA"),
-        "pattern": mregex("trn.*"),
-        "color": TRN,
-        "fullname": "transfer RNAs",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("rRNA"),
-        "pattern": DOTANY,
-        "color": RRN,
-        "fullname": "ribosomal RNAs",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("rep_origin"),
-        "pattern": mregex("^ori.*"),
-        "color": ORI,
-        "fullname": "origin of replication",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("intron"),
-        "pattern": DOTANY,
+Plastome: list[GeneColor] = [
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^psa.*"),
+        color_tuple=PSA,
+        fullname="photosystem I",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^psb.*"),
+        color_tuple=PSB,
+        fullname="photosystem II",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^pet.*"),
+        color_tuple=PET,
+        fullname="cytochrome b/f complex",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^atp.*"),
+        color_tuple=ATP,
+        fullname="ATP synthase",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^ndh.*"),
+        color_tuple=NDH,
+        fullname="NADH dehydrogenase",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^rbc[lL].*"),
+        color_tuple=RBCL,
+        fullname="RubisCO large subunit",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^rpo.*"),
+        color_tuple=RPO,
+        fullname="RNA polymerase",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^rps.*"),
+        color_tuple=RPS,
+        fullname="ribosomal proteins (SSU)",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^rpl.*"),
+        color_tuple=RPL,
+        fullname="ribosomal proteins (LSU)",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^(clp|mat).*"),
+        color_tuple=CLP,
+        fullname="clpP, matK",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^ycf.*"),
+        color_tuple=YCF,
+        fullname="hypothetical chloroplast reading frames (ycf)",
+    ),
+    GeneColor(
+        type=mregex("CDS|gene"),
+        pattern=mregex("^orf.*"),
+        color_tuple=ORF,
+        fullname="ORFs",
+    ),
+    GeneColor(
+        type=mregex("tRNA"),
+        pattern=mregex("trn.*"),
+        color_tuple=TRN,
+        fullname="transfer RNAs",
+    ),
+    GeneColor(
+        type=mregex("rRNA"),
+        pattern=DOTANY,
+        color_tuple=RRN,
+        fullname="ribosomal RNAs",
+    ),
+    GeneColor(
+        type=mregex("rep_origin"),
+        pattern=mregex("^ori.*"),
+        color_tuple=ORI,
+        fullname="origin of replication",
+    ),
+    GeneColor(
+        type=mregex("intron"),
+        pattern=DOTANY,
         # "color": WHITE,
-        "color": vvlgrey,
-        "fullname": "introns",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("other"),
-        "pattern": DOTANY,
-        "color": VIOLET,
-        "fullname": "other genes",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("_operon_"),
-        "pattern": DOTANY,
-        "color": RED,
-        "fullname": "polycistronic transcripts",
-        "drawflag": False,
-    },
+        color_tuple=vvlgrey,
+        fullname="introns",
+    ),
+    GeneColor(
+        type=mregex("other"),
+        pattern=DOTANY,
+        color_tuple=VIOLET,
+        fullname="other genes",
+    ),
+    GeneColor(
+        type=mregex("_operon_"),
+        pattern=DOTANY,
+        color_tuple=RED,
+        fullname="polycistronic transcripts",
+        drawflag=False,
+    ),
 ]
 
 
-Chondriome: list[Colour] = [
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^(nad|nd).*"),
-        "color": NDH,
-        "fullname": "complex I (NADH dehydrogenase)",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^sdh.*"),
-        "color": SDH,
-        "fullname": "complex II (succinate dehydrogenase)",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^cob.*"),
-        "color": COB,
-        "fullname": "complex III (ubichinol cytochrome c reductase)",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^cox.*"),
-        "color": COX,
-        "fullname": "complex IV (cytochrome c oxidase)",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^atp.*"),
-        "color": ATP,
-        "fullname": "ATP synthase",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^ccb.*"),
-        "color": PSB,
-        "fullname": "cytochrome c biogenesis",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^rpo.*"),
-        "color": RPO,
-        "fullname": "RNA polymerase",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^rps.*"),
-        "color": RPS,
-        "fullname": "ribosomal proteins (SSU)",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^rpl.*"),
-        "color": RPL,
-        "fullname": "ribosomal proteins (LSU)",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^(clp|mat).*"),
-        "color": CLP,
-        "fullname": "maturases",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("gene"),
-        "pattern": mregex("^orf.*"),
-        "color": ORF,
-        "fullname": "ORFs",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("tRNA"),
-        "pattern": DOTANY,
-        "color": TRN,
-        "fullname": "transfer RNAs",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("rRNA"),
-        "pattern": DOTANY,
-        "color": RRN,
-        "fullname": "ribosomal RNAs",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("rep_origin"),
-        "pattern": mregex("^ori.*"),
-        "color": ORI,
-        "fullname": "origin of replication",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("intron"),
-        "pattern": DOTANY,
+Chondriome: list[GeneColor] = [
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^(nad|nd).*"),
+        color_tuple=NDH,
+        fullname="complex I (NADH dehydrogenase)",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^sdh.*"),
+        color_tuple=SDH,
+        fullname="complex II (succinate dehydrogenase)",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^cob.*"),
+        color_tuple=COB,
+        fullname="complex III (ubichinol cytochrome c reductase)",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^cox.*"),
+        color_tuple=COX,
+        fullname="complex IV (cytochrome c oxidase)",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^atp.*"),
+        color_tuple=ATP,
+        fullname="ATP synthase",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^ccb.*"),
+        color_tuple=PSB,
+        fullname="cytochrome c biogenesis",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^rpo.*"),
+        color_tuple=RPO,
+        fullname="RNA polymerase",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^rps.*"),
+        color_tuple=RPS,
+        fullname="ribosomal proteins (SSU)",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^rpl.*"),
+        color_tuple=RPL,
+        fullname="ribosomal proteins (LSU)",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^(clp|mat).*"),
+        color_tuple=CLP,
+        fullname="maturases",
+    ),
+    GeneColor(
+        type=mregex("gene"),
+        pattern=mregex("^orf.*"),
+        color_tuple=ORF,
+        fullname="ORFs",
+    ),
+    GeneColor(
+        type=mregex("tRNA"),
+        pattern=DOTANY,
+        color_tuple=TRN,
+        fullname="transfer RNAs",
+    ),
+    GeneColor(
+        type=mregex("rRNA"),
+        pattern=DOTANY,
+        color_tuple=RRN,
+        fullname="ribosomal RNAs",
+    ),
+    GeneColor(
+        type=mregex("rep_origin"),
+        pattern=mregex("^ori.*"),
+        color_tuple=ORI,
+        fullname="origin of replication",
+    ),
+    GeneColor(
+        type=mregex("intron"),
+        pattern=DOTANY,
         # "color": WHITE,
-        "color": vvlgrey,
-        "fullname": "introns",
-        "drawflag": True,
-    },
-    {
-        "type": mregex("_operon_"),
-        "pattern": DOTANY,
-        "color": RED,
-        "fullname": "polycistronic transcripts",
-        "drawflag": False,
-    },
+        color_tuple=vvlgrey,
+        fullname="introns",
+    ),
+    GeneColor(
+        type=mregex("_operon_"),
+        pattern=DOTANY,
+        color_tuple=RED,
+        fullname="polycistronic transcripts",
+        drawflag=False,
+    ),
 ]
+
+COLOR_DICT = {"mitochondrion": Chondriome, "plastid": Plastome, "chloroplast": Plastome}
+
+
+def get_colors_for_genome(genome_type: str) -> list[GeneColor]:
+    return COLOR_DICT.get(genome_type, Plastome)
