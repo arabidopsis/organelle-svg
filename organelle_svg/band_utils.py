@@ -29,7 +29,7 @@ def has_seq(rec: SeqRecord) -> bool:
     return tryseq()
 
 
-class intrange:
+class IntRangeClass:
     __slots__ = ("end", "start")
 
     def __init__(self, start: int, end: int):
@@ -42,7 +42,7 @@ class intrange:
         return self.end - self.start
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, intrange):
+        if not isinstance(other, IntRangeClass):
             return False
         return other.start == self.start and other.end == self.end
 
@@ -53,18 +53,18 @@ class intrange:
     def center(self) -> int:
         return (self.start + self.end) // 2
 
-    def overlaps(self, ir: intrange) -> bool:
+    def overlaps(self, ir: IntRangeClass) -> bool:
         return (
             (ir.start < self.end and ir.start >= self.start)  # ir.start overlaps self
             or (ir.end > self.start and ir.end <= self.end)  # ir.end overlaps self
             or (ir.start < self.start and ir.end > self.end)  # ir spans self
         )
 
-    def cdistance(self, ir: intrange) -> int:
+    def cdistance(self, ir: IntRangeClass) -> int:
         """Center to center distance."""
         return self.center - ir.center
 
-    def distance(self, ir: intrange) -> int:
+    def distance(self, ir: IntRangeClass) -> int:
         if self.overlaps(ir) or self.adjacent(ir):
             return 0
         if self.end < ir.start:  # we are before ir
@@ -73,28 +73,28 @@ class intrange:
         # assert self.start > ir.end
         return self.start - ir.end  # we are after ir
 
-    def merge(self, ir: intrange) -> intrange:
+    def merge(self, ir: IntRangeClass) -> IntRangeClass:
         # assert self.overlaps(ir) or self.adjacent(ir)
-        return intrange(min(self.start, ir.start), max(self.end, ir.end))
+        return IntRangeClass(min(self.start, ir.start), max(self.end, ir.end))
 
-    def adjacent(self, ir: intrange) -> bool:
+    def adjacent(self, ir: IntRangeClass) -> bool:
         """endpoint adjacent"""
         return self.end == ir.start or self.start == ir.end
 
-    def chop(self, ir: intrange) -> Iterator[intrange]:
+    def chop(self, ir: IntRangeClass) -> Iterator[IntRangeClass]:
         assert self.overlaps(ir)
         # return parts of this range that *don't* overlap with ir
         if ir.end < self.end:
-            yield intrange(ir.end, self.end)
+            yield IntRangeClass(ir.end, self.end)
         if ir.start > self.start:
-            yield intrange(self.start, ir.start)
+            yield IntRangeClass(self.start, ir.start)
 
-    def intersect(self, ir: intrange) -> intrange:
+    def intersect(self, ir: IntRangeClass) -> IntRangeClass:
         assert self.overlaps(ir)
         if ir.start >= self.start and ir.start < self.end:
-            return intrange(ir.start, min(ir.end, self.end))
+            return IntRangeClass(ir.start, min(ir.end, self.end))
         if ir.end <= self.end and ir.end > self.start:
-            return intrange(max(self.start, ir.start), ir.end)
+            return IntRangeClass(max(self.start, ir.start), ir.end)
         if ir.start >= self.start and ir.end <= self.end:
             return ir
         return self
@@ -103,15 +103,15 @@ class intrange:
         return f"{self.start}..{self.end}"
 
 
-class intrangeset:
-    def __init__(self, args: Iterator[intrange] | None = None):
+class IntRangeSet:
+    def __init__(self, args: Iterator[IntRangeClass] | None = None):
         # ss will contain the start value for all ranges stored in
         # m (keyed on start values)
         # we keep that state that all adjacent and overlapping ranges are merged
         # so that there are just a sorted list of non-overlapping
         # ranges that don't abut.
         self.ss = SortedList()  # type: ignore[no-untyped-call]
-        self.m: dict[int, intrange] = {}
+        self.m: dict[int, IntRangeClass] = {}
         if args is not None:
             for a in args:
                 self.add(a)
@@ -119,7 +119,7 @@ class intrangeset:
     def __repr__(self) -> str:
         return " ".join(repr(self.m[s]) for s in self.ss)
 
-    def remove(self, ir: intrange) -> None:
+    def remove(self, ir: IntRangeClass) -> None:
         overlapping = list(self.overlapping(ir))
         for o in overlapping:
             self.ss.remove(o.start)
@@ -127,7 +127,7 @@ class intrangeset:
             for n in o.chop(ir):
                 self.add(n)
 
-    def add(self, ir: intrange) -> None:
+    def add(self, ir: IntRangeClass) -> None:
         ss, m = self.ss, self.m
         ip = max(ss.bisect_left(ir.start) - 1, 0)
         merge = []
@@ -146,23 +146,23 @@ class intrangeset:
             del m[i.start]  # not needed anymore
 
         ss.add(ir.start)
-        if not isinstance(ir, intrange):
-            ir = intrange(ir.start, ir.end)
+        if not isinstance(ir, IntRangeClass):
+            ir = IntRangeClass(ir.start, ir.end)
         m[ir.start] = ir
 
-    def __iter__(self) -> Iterator[intrange]:
+    def __iter__(self) -> Iterator[IntRangeClass]:
         m = self.m
         for s in self.ss:
             yield m[s.start]
 
-    def overlaps(self, ir: intrange) -> bool:
+    def overlaps(self, ir: IntRangeClass) -> bool:
         # ss = self.ss
         # ip = max(ss.bisect_left(ir.start) - 1, 0)
         for _ in self.overlapping(ir):
             return True
         return False
 
-    def overlapping(self, ir: intrange) -> Iterator[intrange]:
+    def overlapping(self, ir: IntRangeClass) -> Iterator[IntRangeClass]:
         ss, m = self.ss, self.m
         ip = max(ss.bisect_left(ir.start) - 1, 0)
         for ist in ss.islice(ip):
@@ -172,16 +172,14 @@ class intrangeset:
             if ir2.overlaps(ir):
                 yield ir2
 
-    def overlaps_mod(self, ir: intrange, mx: int) -> bool:
+    def overlaps_mod(self, ir: IntRangeClass, mx: int) -> bool:
         if self.overlaps(ir):
             return True
         start = ir.start % mx
         if start == ir.start:
             return False
-        i = intrange(start, start + len(ir))
-        if self.overlaps(i):
-            return True
-        return False
+        i = IntRangeClass(start, start + len(ir))
+        return bool(self.overlaps(i))
 
 
 def iter_features(rec: SeqRecord) -> Iterator[tuple[int, SeqFeature]]:
@@ -201,13 +199,13 @@ def iter_features(rec: SeqRecord) -> Iterator[tuple[int, SeqFeature]]:
             idx += 1
 
 
-class overlapset:
+class OverLapSet:
     def __init__(self, start: int, end: int, size: int):
         self.start, self.end, self.size = start, end, size
         self.buckets = {i: SortedList() for i in range(start, end, size)}  # type: ignore[no-untyped-call]
-        self.m: dict[int, set[intrange]] = defaultdict(set)
+        self.m: dict[int, set[IntRangeClass]] = defaultdict(set)
 
-    def add(self, ir: intrange) -> None:
+    def add(self, ir: IntRangeClass) -> None:
         start, end, size = self.start, self.end, self.size
         m, buckets = self.m, self.buckets
         s, e = size * (ir.start // size), size * (ir.end // size)
@@ -225,7 +223,7 @@ class overlapset:
                 buckets[i].add(ir.start)
                 m[ir.start].add(ir)
 
-    def overlaps(self, ir: intrange) -> list[intrange]:
+    def overlaps(self, ir: IntRangeClass) -> list[IntRangeClass]:
         end, size = self.end, self.size
         m, buckets = self.m, self.buckets
         s, e = size * (ir.start // size), size * (ir.end // size)
@@ -233,7 +231,7 @@ class overlapset:
             e += size
         e = min(e, end)
 
-        def ii() -> Iterator[intrange]:
+        def ii() -> Iterator[IntRangeClass]:
             for b in range(s, e, size):
                 bk = buckets[b]
                 iend = bk.bisect_left(ir.end)
@@ -285,8 +283,8 @@ class Overlapping:
         nblocks: int,
         strands: Callable[[Any], Any] = lambda s: s,
     ) -> tuple[
-        dict[str, overlapset],
-        dict[Any, dict[intrange, tuple[SeqFeature, SimpleLocation]]],
+        dict[str, OverLapSet],
+        dict[Any, dict[IntRangeClass, tuple[SeqFeature, SimpleLocation]]],
         list[
             tuple[
                 tuple[SeqFeature, SimpleLocation],
@@ -300,12 +298,12 @@ class Overlapping:
                 tuple[SeqFeature, SimpleLocation],
             ]
         ] = []
-        fmap: dict[Any, dict[intrange, tuple[SeqFeature, SimpleLocation]]] = {
+        fmap: dict[Any, dict[IntRangeClass, tuple[SeqFeature, SimpleLocation]]] = {
             strands(s): {} for s in (1, -1, 0, None)
         }
         size = len(rec) // nblocks
         size = 1 if size == 0 else size
-        b = {strands(s): overlapset(0, len(rec), size) for s in (1, -1, 0, None)}
+        b = {strands(s): OverLapSet(0, len(rec), size) for s in (1, -1, 0, None)}
         part: SimpleLocation
         for _, feat in iter_features(rec):
             if feat.location is None:
@@ -318,7 +316,7 @@ class Overlapping:
                     start += len(rec)
                     end += len(rec)
                 s = strands(part.strand)
-                i = intrange(start, end)
+                i = IntRangeClass(start, end)
 
                 b[s].add(i)
 
@@ -343,10 +341,10 @@ class Overlapping:
                     start += len(rec)
                     end += len(rec)
                 s = strands(part.strand)
-                po = intrange(start, end)  # type: ignore
+                po = IntRangeClass(start, end)  # type: ignore
                 for o in b[s].overlaps(po):
                     # ofeat, opart = fmap[s][o]
-                    if not o == po and o not in seen:
+                    if o != po and o not in seen:
                         ofeat, opart = fmap[s][o]
                         overlap = po.intersect(o)
                         # assert overlap, (po, o)

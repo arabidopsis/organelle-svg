@@ -3,50 +3,40 @@ from __future__ import annotations
 import abc
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime
-from datetime import timezone
+from datetime import UTC, datetime
 from math import pi
-from typing import Any
-from typing import override
-from typing import TYPE_CHECKING
-from typing import TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict, override
 
+from .band_utils import Overlapping, iter_features
 from .band_utils import has_seq as has_seq_data
-from .band_utils import iter_features
-from .band_utils import Overlapping
 from .config import SOURCE
-from .histograms import coverage_histogram
-from .histograms import depth_histogram
-from .histograms import gc_histogram
-from .irscan import IRScan
-from .irscan import IRScanResult
+from .histograms import coverage_histogram, depth_histogram, gc_histogram
+from .irscan import IRScan, IRScanResult
 from .og_colors import get_colors_for_genome
-from .svg import add_center_text
-from .svg import add_legend
-from .svg import savesvg
-from .svg import tobytes
-from .svg import tostring
-from .svg_colors import colorer
-from .svg_colors import HISTOGRAM_COLORS
-from .svg_utils import arc
-from .svg_utils import circle
-from .svg_utils import fix_text_overlap
-from .svg_utils import group
-from .svg_utils import klass
-from .svg_utils import maker
-from .svg_utils import middle
-from .svg_utils import Overlap
-from .svg_utils import radial_line
-from .svg_utils import rect
-from .svg_utils import styles_to_classes
-from .svg_utils import svge
-from .svg_utils import text_horz
-from .svg_utils import text_len
-from .svg_utils import text_perp
-from .svg_utils import ticks
+from .svg import add_center_text, add_legend, savesvg, tobytes, tostring
+from .svg_colors import HISTOGRAM_COLORS, colorer
+from .svg_utils import (
+    Overlap,
+    arc,
+    circle,
+    fix_text_overlap,
+    group,
+    klass,
+    maker,
+    middle,
+    radial_line,
+    rect,
+    styles_to_classes,
+    svge,
+    text_horz,
+    text_len,
+    text_perp,
+    ticks,
+)
 
 if TYPE_CHECKING:
-    from typing import Callable, Iterator, Sequence, Unpack
+    from collections.abc import Callable, Iterator, Sequence
+    from typing import Unpack
     from xml.etree.ElementTree import Element
 
     from Bio.SeqFeature import CompoundLocation, SeqFeature, SimpleLocation
@@ -68,11 +58,8 @@ def create_band(
     if gene:
         c = ""
         if hasattr(part, "comment"):
-            c = getattr(part, "comment") or ""
-            if c:
-                c = " " + str(c)
-            else:
-                c = ""
+            c = part.comment or ""  # type: ignore
+            c = c = " " + str(c) if c else ""
         fmt = f"{gene}:[{part.start + 1}..{part.end}]{c}"  # type: ignore
         attr = {"data-info": fmt, **attrib}
     else:
@@ -108,7 +95,7 @@ def show_band(
 
     def isintron(loc: SimpleLocation) -> bool:
         if hasattr(loc, "intron"):
-            return bool(getattr(loc, "intron"))
+            return bool(loc.intron)  # type: ignore
         return False
 
     namer = default_namer(rec.name)
@@ -119,11 +106,8 @@ def show_band(
     def create_glyph(gene: str, part: SimpleLocation, color: str) -> Element:
         c = ""
         if hasattr(part, "comment"):
-            c = getattr(part, "comment") or ""
-            if c:
-                c = " " + str(c)
-            else:
-                c = ""
+            c = part.comment or ""
+            c = " " + str(c) if c else ""
         fmt = f"{gene}:[{part.start + 1}..{part.end}]{c}"  # type: ignore
         attr = {"data-info": fmt, **attrib}
         start, end = part.start, part.end
@@ -242,7 +226,7 @@ def show_overlap(
     dnamer = default_namer(rec.name)
 
     def isintron(part: SimpleLocation) -> bool:
-        return hasattr(part, "intron") and getattr(part, "intron")
+        return hasattr(part, "intron") and part.intron
 
     def namer(feat: SeqFeature, part: SimpleLocation) -> str:
         if isintron(part):
@@ -305,7 +289,7 @@ def get_gene_names(
         return try_name(feat.qualifiers)
 
     if namer is None:
-        try_name = default_namer(rec.name)  # noqa: F811
+        try_name = default_namer(rec.name)
         namer = mynamer
 
     return get_gene_names_from_features(
@@ -349,7 +333,7 @@ def get_gene_names_from_features(
 
     if namer is None:
         try_name = default_namer("unknown")
-        namer = lambda feat: try_name(feat.qualifiers)  # noqa: E731
+        namer = lambda feat: try_name(feat.qualifiers)
 
     def position(
         location: SimpleLocation,
@@ -401,9 +385,8 @@ def get_gene_names_from_features(
                 parts = [feat.location]
         for fno, location in enumerate(parts):
             # don't name introns
-            if hasattr(location, "intron") and getattr(location, "intron"):
-                if not subfeatures:
-                    continue
+            if hasattr(location, "intron") and location.intron and not subfeatures:  # type: ignore
+                continue
             locs = list(position(location, feat, sf))  # type: ignore
             for fno1, (pos, loc) in enumerate(locs):
                 angle = get_angle(pos)
@@ -529,7 +512,7 @@ class BaseDrawArgs(TypedDict, total=False):
 
 class BaseDraw(AttrMerger, abc.ABC):
     whoami: str | None = "Chloë"
-    TZ = datetime.now(timezone.utc).astimezone().tzinfo
+    TZ = datetime.now(UTC).astimezone().tzinfo
 
     styles_to_classes: bool = True
     gc_pos: float = 0.34
@@ -603,8 +586,8 @@ class BaseDraw(AttrMerger, abc.ABC):
 
     def reinit(self) -> None:
         radius = self.radius
-        T = f"translate({radius} {radius})"
-        g = group(transform=T)
+        trans = f"translate({radius} {radius})"
+        g = group(transform=trans)
         self.g = g
 
     def save(self, svgname: str, pretty_print: bool = False) -> None:
@@ -695,7 +678,7 @@ class BaseDraw(AttrMerger, abc.ABC):
             text_color=self.style.text_color,
         )
 
-    def get_IR(self, rec: SeqRecord) -> IRScanResult | None:
+    def get_IR(self, rec: SeqRecord) -> IRScanResult | None:  # noqa: N802
         def fl(res: list[SeqFeature], watson: bool) -> Iterator[SimpleLocation]:
             for r in res:
                 if r.location is not None:
@@ -910,11 +893,9 @@ class BaseDraw(AttrMerger, abc.ABC):
 
     @classmethod
     def legend_text(cls, genome_type: str) -> list[tuple[str, str | None]]:
-        C = get_colors_for_genome(genome_type)
+        clist = get_colors_for_genome(genome_type)
         # name and color as r,g,b as a string
-        lines: list[tuple[str, str | None]] = [
-            (r.fullname, r.color_str) for r in C if r.drawflag
-        ]
+        lines: list[tuple[str, str | None]] = [(r.fullname, r.color_str) for r in clist if r.drawflag]
         if cls.whoami:
             tme = datetime.now(tz=cls.TZ)
             lines.append(
@@ -940,10 +921,7 @@ class BaseDraw(AttrMerger, abc.ABC):
                     str(center_text[0]) + " genome",
                 )
 
-        if "source" not in rec.annotations:
-            txt = ""
-        else:
-            txt = str(rec.annotations["source"])
+        txt = "" if "source" not in rec.annotations else str(rec.annotations["source"])
 
         m = SOURCE.match(txt)
         if m:
@@ -976,19 +954,19 @@ class OGDraw(BaseDraw):
         **kwargs: Unpack[BaseDrawArgs],
     ):
         super().__init__(**kwargs)
-        N = len(rec)
+        bign = len(rec)
         ir_swapped = False
         if self.rotate_image:
             ir = self.get_IR(rec)
-            rot, ir_swapped = rotate(ir, N) if ir else (0, False)
+            rot, ir_swapped = rotate(ir, bign) if ir else (0, False)
         else:
             rot = 0
 
         def get_angle(pos: float) -> float:
-            return (N - pos - rot) * 360 / N
+            return (bign - pos - rot) * 360 / bign
 
         def get_tick_angle(pos: float) -> float:
-            return (N - pos) * 360 / N
+            return (bign - pos) * 360 / bign
 
         self.genome = self.genome or self.get_genome_type(rec)
         self.rec = rec
@@ -1007,7 +985,7 @@ class OGDraw(BaseDraw):
             g = try_name(feat.qualifiers)
             if feat.location:
                 for loc in feat.location.parts:
-                    if hasattr(loc, "comment") and getattr(loc, "comment"):
+                    if hasattr(loc, "comment") and loc.comment:
                         return g + "*"  # f" ({loc.comment})"
             return g
 

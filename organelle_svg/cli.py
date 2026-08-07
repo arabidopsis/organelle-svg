@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import gzip
-from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import click
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 CHLOE = "Chloë"
 

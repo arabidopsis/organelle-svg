@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Literal, TypeAlias
+from typing import Literal
 
 
 def mregex(s: str) -> re.Pattern[str]:
@@ -40,7 +40,7 @@ VIOLET = 171, 37, 157
 
 vvlgrey = 240, 240, 240  # taken from /circos-colors.html
 
-ColourTuple: TypeAlias = tuple[int, int, int] | tuple[int, int, int, float]
+type ColourTuple = tuple[int, int, int] | tuple[int, int, int, float]
 
 
 @dataclass(kw_only=True)
@@ -64,7 +64,7 @@ def totuple(c: str) -> ColourTuple:
     return tuple(int(c.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4))  # type: ignore
 
 
-PatternKeys: TypeAlias = Literal["type", "pattern"]
+type PatternKeys = Literal["type", "pattern"]
 
 Plastome: list[GeneColor] = [
     GeneColor(

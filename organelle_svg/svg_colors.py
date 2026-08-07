@@ -22,11 +22,11 @@ def colorer(
     default: str = "white",
 ) -> Callable[[str], str]:
     colours = get_colors_for_genome(genome_type)
-    C = [(getattr(d, by), d.color_str) for d in colours if d.drawflag]
+    clist = [(getattr(d, by), d.color_str) for d in colours if d.drawflag]
 
     def color(gene: str) -> str:
 
-        for m, color in C:
+        for m, color in clist:
             if m.match(gene):
                 return color
 

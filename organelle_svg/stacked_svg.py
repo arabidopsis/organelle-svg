@@ -34,14 +34,14 @@ class StackedDraw(BaseDraw):
         **kwargs: Unpack[BaseDrawArgs],
     ):
         super().__init__(**kwargs)
-        N = max(len(r) for r in recs)
+        _num = max(len(r) for r in recs)
 
         def get_angle(pos: float) -> float:
-            return (N - pos) * 360 / N
+            return (_num - pos) * 360 / _num
 
         self.get_angle = get_angle
         self.recs = recs
-        self.N = N
+        self.N = _num
         self.stacks: dict[int | None, set[int]] = {}
         self.name = name
         self.colorf = colorer(type)

@@ -216,10 +216,7 @@ def do_links(
             )
             g2.append(p)
         else:
-            if l1.name == rec1.id:
-                get_angle = chr1.get_angle
-            else:
-                get_angle = chr2.get_angle
+            get_angle = chr1.get_angle if l1.name == rec1.id else chr2.get_angle
             dr = r(0.025)
             attr = {
                 "data-info": f"{l1.gene}[{l1.start + 1}..{l1.end}]",

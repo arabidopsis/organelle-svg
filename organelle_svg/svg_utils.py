@@ -3,11 +3,11 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from math import cos, pi, sin, tan
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING
 from uuid import uuid4
 from xml.etree.ElementTree import Element
 
-from .band_utils import intrange, intrangeset
+from .band_utils import IntRangeClass, IntRangeSet
 from .config import SVG_DEFAULT_FONTS
 
 if TYPE_CHECKING:
@@ -96,7 +96,7 @@ def rgba(c: str, m: re.Match[str] | None = None) -> dict[str, str]:
     return tuple_color(color, a=float(a))
 
 
-RGB_Type: TypeAlias = tuple[int, int, int]
+type RGB_Type = tuple[int, int, int]
 
 
 def tuple_color(c: RGB_Type, a: float | None = None) -> dict[str, str]:
@@ -131,9 +131,8 @@ def tostr(v: Any) -> str | dict[str, str]:
 
 
 def add_units(k: str, v: str) -> str:
-    if k == "font-size":  # font-size without units as a class doesn't work
-        if not v.endswith(("px", "em", "rem")):
-            v = f"{v}px"
+    if k == "font-size" and not v.endswith(("px", "em", "rem")):
+        v = f"{v}px"
     return v
 
 
@@ -148,10 +147,7 @@ def attr(d: dict[str, Any]) -> dict[str, str]:
             ret.update(a)
             continue
         k, v = kebab_case(k), tostr(v2)
-        if k in VALID_STYLES:
-            tgt = style
-        else:
-            tgt = ret
+        tgt = style if k in VALID_STYLES else ret
         if isinstance(v, dict):
             tgt.update(v)
         else:
@@ -346,7 +342,7 @@ def annular(x: float, y: float, r: float, dr: float) -> str:
 def annular_path(x: float, y: float, r: float, dr: float) -> str:
     # simpler without sin cosine comp
     o = r + dr
-    return f"""M {x:.4f},{y - o:.4f} A{o:.4f},{o:.4f} 0 1,1 {x - 0.001:.4f},{y - o:.4f} z M {x:.4f},{y + r:.4f} A{r:.4f},{r:.4f} 0 1,0 {x - 0.001:.4f},{y + r:.4f} z"""
+    return f"""M {x:.4f},{y - o:.4f} A{o:.4f},{o:.4f} 0 1,1 {x - 0.001:.4f},{y - o:.4f} z M {x:.4f},{y + r:.4f} A{r:.4f},{r:.4f} 0 1,0 {x - 0.001:.4f},{y + r:.4f} z"""  # noqa: E501
 
 
 def svge(width: int, height: int | None = None, **attrib: Any) -> Element:
@@ -540,10 +536,7 @@ def hist(
         s, e = get_angle(d.start), get_angle(d.end)
         attrs = ({**attrib, **a}) if a else attrib
         v = r(v) / 2 if offset else r(v)
-        if inverted:
-            a1 = arc(rr + top, s, e, -v, **attrs)
-        else:
-            a1 = arc(rr, s, e, v, **attrs)
+        a1 = arc(rr + top, s, e, -v, **attrs) if inverted else arc(rr, s, e, v, **attrs)
         g.append(a1)
     return g
 
@@ -656,10 +649,7 @@ def text_perp(
         attrib.pop("fill")
     if "stroke" not in attrib:
         attrib["stroke"] = "grey"
-    if outside:
-        dp = abs(r(dp))
-    else:
-        dp = -abs(r(dp))
+    dp = abs(r(dp)) if outside else -abs(r(dp))
     offset = r(offset)
 
     for overlap in data:
@@ -669,10 +659,7 @@ def text_perp(
 
         # tlen = text_len(overlap.text, fs)
 
-        if abs(r_angle) > 90 and abs(r_angle) < 270:
-            rot = 180
-        else:
-            rot = 0
+        rot = 180 if abs(r_angle) > 90 and abs(r_angle) < 270 else 0
         dx, dy = fs / 2, fs / 3
 
         if outside:
@@ -750,9 +737,7 @@ def text_horz(
     :param data: a list of [Overlap(angle, text, delta_angle, delta_r)]
     """
     tattrib = {k: v for k, v in attrib.items() if k not in {"stroke", "stroke_width"}}
-    attrib = {
-        k: v for k, v in attrib.items() if k not in {"font_family", "font_weight"}
-    }
+    attrib = {k: v for k, v in attrib.items() if k not in {"font_family", "font_weight"}}
     if "font_family" not in tattrib:
         tattrib["font_family"] = FontFamily
     if "fill" in attrib:
@@ -842,11 +827,11 @@ def fix_text_overlap(
     # radius we a specifiying
     # assumes data is sorted by angle
     scale = 10.0
-    irs = intrangeset()
+    irs = IntRangeSet()
 
-    def irf(angle: float, txt: str) -> intrange:
+    def irf(angle: float, txt: str) -> IntRangeClass:
         w = text_height(txt, fs)
-        return intrange(int(scale * (angle - w / 2)), int(scale * (angle + w / 2)))
+        return IntRangeClass(int(scale * (angle - w / 2)), int(scale * (angle + w / 2)))
 
     # FIXME: doesn't deal with circularity of genome
     ndata = []
@@ -864,7 +849,7 @@ def fix_text_overlap(
             # only downstream
             for iii in range(1, ntries + 1):
                 s = i.start + rng * iii
-                i2 = intrange(s, s + rng)
+                i2 = IntRangeClass(s, s + rng)
                 if not irs.overlaps(i2):
                     o.delta_a = angle_wrap(
                         o.delta_a + iii * text_height(o.text, fs) * delta_a_fudge,
@@ -935,7 +920,7 @@ def ticks(
     g2 = group(klass=klass(attrib, "ticks"))
 
     if get_angle is None:
-        get_angle = lambda b: b * 360 / nbases
+        get_angle = lambda b: b * 360 / nbases  # noqa: E731
     if not font_size:
         font_size = r(0.04)
     dx = 0
@@ -981,10 +966,7 @@ def ticks(
 
     def dolabel(base: float, angle: float, pos: float) -> None:
         txt = f"{base // 1000}kB"
-        if 90 < angle < 270:
-            rot = 180
-        else:
-            rot = 0
+        rot = 180 if 90 < angle < 270 else 0
 
         text_anchor = "start" if rot == 0 else "end"
 

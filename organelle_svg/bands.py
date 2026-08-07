@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from Bio.SeqFeature import SimpleLocation
 
-from .band_utils import intrange, intrangeset, iter_features
+from .band_utils import IntRangeClass, IntRangeSet, iter_features
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -86,8 +86,8 @@ class Band:
         return f"{self.__class__.__name__}({self.name},{self.gene},[{self.start},{self.end}], {self.strand})"
 
 
-def get_range_map_(rec: SeqRecord) -> dict[int, intrangeset]:
-    ranges = {1: intrangeset(), -1: intrangeset()}
+def get_range_map_(rec: SeqRecord) -> dict[int, IntRangeSet]:
+    ranges = {1: IntRangeSet(), -1: IntRangeSet()}
 
     for _, feat in iter_features(rec):
         if feat.location is None:
@@ -97,13 +97,13 @@ def get_range_map_(rec: SeqRecord) -> dict[int, intrangeset]:
 
             start, end = int(part.start), int(part.end)  # type: ignore
             if end > start:
-                ranges[strand].add(intrange(start, end))
+                ranges[strand].add(IntRangeClass(start, end))
     return ranges
 
 
 def intron_walker_(
     parts: list[SimpleLocation],
-    ranges: dict[int, intrangeset] | None = None,
+    ranges: dict[int, IntRangeSet] | None = None,
 ) -> Iterator[tuple[str, SimpleLocation]]:
     prev = pstrand = None
     for part in parts:
@@ -119,13 +119,15 @@ def intron_walker_(
             prev = end if strand == 1 else (start if strand == -1 else None)
             continue
 
-        if ranges and prev is not None and strand == pstrand and s < e:
-            # meas = (RangeSet(s, e) & ranges[p.strand]).measure()
-            #  meas = len(RangeSet(s, e).intersection(ranges[p.strand]))
-
+        if (
+            ranges
+            and prev is not None
+            and strand == pstrand
+            and s < e
             # actual intron that doesn't overlap other genes
-            if not ranges[strand or 0].overlaps(intrange(s, e)):
-                yield "intron", SimpleLocation(s, e, strand)  # type: ignore[no-untyped-call]
+            and not ranges[strand or 0].overlaps(IntRangeClass(s, e))
+        ):
+            yield "intron", SimpleLocation(s, e, strand)  # type: ignore[no-untyped-call]
         # circos fails if start == end even though this is a 1 bp span
         # see /lib/Circos/Karyotype.pm line 134
         assert end >= start
@@ -143,7 +145,7 @@ def get_bands_(
     span: Callable[[Any], Any] | bool = False,
     number_gene: bool = True,
     introns: bool = True,
-    BandCls: type[Band] = Band,
+    band_class: type[Band] = Band,
 ) -> Iterator[Band]:
     ranges = None
     if introns:
@@ -186,7 +188,7 @@ def get_bands_(
         for typ, part in intron_walker_(parts, ranges):  # type: ignore[arg-type]
             gene_type = typ if typ == "intron" else feat.type
 
-            yield BandCls(
+            yield band_class(
                 # name=f"i-{name}",  # we key on this
                 name=name,  # now we key on gene_type
                 gene=gene,

@@ -53,19 +53,19 @@ class NormalDraw(BaseDraw):
         super().__init__(**kwargs)
         n0 = len(rec0)
         n1 = len(rec1)
-        N = max(n0, n1)
+        bign = max(n0, n1)
         ir_swapped = False
         if self.rotate_image:
             ir = self.get_IR(rec1) if n1 >= n0 else self.get_IR(rec0)
-            rot, ir_swapped = rotate(ir, N) if ir else (0, False)
+            rot, ir_swapped = rotate(ir, bign) if ir else (0, False)
         else:
             rot = 0
 
         def get_angle(p: float) -> float:
-            return (N - p - rot) * 360 / N
+            return (bign - p - rot) * 360 / bign
 
         def get_tick_angle(p: float) -> float:
-            return (N - p) * 360 / N
+            return (bign - p) * 360 / bign
 
         self.genome = self.genome or self.get_genome_type(rec0)
         assert self.genome is not None

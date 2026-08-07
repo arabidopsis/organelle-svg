@@ -5,14 +5,16 @@ import logging
 import os
 import re
 from collections import defaultdict
-from collections.abc import Iterator
 from datetime import date
 from pathlib import Path
-from typing import IO, Literal, NamedTuple, TypeAlias
+from typing import IO, TYPE_CHECKING, Literal, NamedTuple
 
 from Bio.Seq import Seq
 from Bio.SeqFeature import CompoundLocation, SeqFeature, SimpleLocation
 from Bio.SeqRecord import SeqRecord
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 logger = logging.getLogger("chloe")
 
@@ -88,9 +90,9 @@ class SFFLocation(SimpleLocation):
 
 def maybe_gzip(fname: str | Path, mode: Literal["wt", "rt"] = "rt") -> IO[str]:
     if Path(fname).name.endswith(".gz"):
-        ret = gzip.open(fname, mode, encoding="utf-8")
+        ret = gzip.open(fname, mode, encoding="utf-8")  # noqa: SIM115
     else:
-        ret = open(fname, mode, encoding="utf-8")
+        ret = open(fname, mode, encoding="utf-8")  # noqa: SIM115
     return ret  # t.cast(t.TextIO, ret)
 
 
@@ -115,7 +117,7 @@ def readsff(
         )
 
 
-LOC: TypeAlias = tuple[str, int, SFFLocation | None]
+type LOC = tuple[str, int, SFFLocation | None]
 
 
 def readsff_fp(
@@ -143,17 +145,13 @@ def readsff_fp(
     def mknote(locations: list[SFFLocation | None]) -> list[str] | None:
         dd = defaultdict(list)
         for loc in locations:
-            if loc is not None:
-                if loc.comment:
-                    dd[loc.comment].append(loc)
+            if loc is not None and loc.comment:
+                dd[loc.comment].append(loc)
         if not dd:
             return None
 
         return [
-            "; ".join(
-                c + ": " + ", ".join(f"({loc.start + 1}..{loc.end})" for loc in locs)
-                for c, locs in dd.items()
-            ),
+            "; ".join(c + ": " + ", ".join(f"({loc.start + 1}..{loc.end})" for loc in locs) for c, locs in dd.items()),
         ]
 
     def get_date() -> str:
@@ -185,9 +183,7 @@ def readsff_fp(
         llocations: list[LOC],
     ) -> SeqFeature | None:
         if not include_introns:
-            llocations = [
-                t for t in llocations if t[0] != "intron"
-            ]  # remove introns...
+            llocations = [t for t in llocations if t[0] != "intron"]  # remove introns...
             if not llocations:
                 if strict:
                     raise ValueError(f"no exons for {ncid}:{gene}")
@@ -197,7 +193,7 @@ def readsff_fp(
         types: list[str]
         orders: list[int]
         locations: list[SFFLocation | None]
-        types, orders, locations = zip(*llocations)  # type: ignore
+        types, orders, locations = zip(*llocations, strict=True)  # type: ignore
 
         note = mknote(locations)
 
@@ -223,9 +219,7 @@ def readsff_fp(
         )
         if note is not None:
             qualifiers["note"] = note
-        phases: set[int] = (
-            {loc.phase for loc in xlocation.parts} if xlocation else set()
-        )
+        phases: set[int] = {loc.phase for loc in xlocation.parts} if xlocation else set()
         if len(phases) == 1:
             phase: int = phases.pop()
             if phase != 0:

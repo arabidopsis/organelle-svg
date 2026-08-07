@@ -100,25 +100,25 @@ class Scanner:
         pre_borders = self.rough_scan()
         if pre_borders is None:
             return None
-        ira_start, _, irb_start, _ = pre_borders
+        ira_start, ira_end, irb_start, irb_end = pre_borders
 
-        IRA_start, IRB_end = self.screen_from_to_pos(
+        ira_start, irb_end = self.screen_from_to_pos(
             max(0, ira_start - self.rough),
             len(self.seq),
             self.precision,
         )
-        if IRA_start is None or IRB_end is None:
+        if ira_start is None or irb_end is None:
             return None
 
-        IRB_start, IRA_end = self.screen_from_to_pos(
+        irb_start, ira_end = self.screen_from_to_pos(
             max(0, irb_start - self.rough),
             len(self.seq),
             self.precision,
         )
-        if IRB_start is None or IRA_end is None:
+        if irb_start is None or ira_end is None:
             return None
 
-        return IRScanResult(IRA_start, IRA_end, IRB_start, IRB_end)
+        return IRScanResult(ira_start, ira_end, irb_start, irb_end)
 
 
 class IRScan:
