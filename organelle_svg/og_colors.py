@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Literal
-from typing import TypeAlias
+from typing import Literal, TypeAlias
 
 
 def mregex(s: str) -> re.Pattern[str]:
-    return re.compile(s, re.I)
+    return re.compile(s, re.IGNORECASE)
 
 
 DOTANY = mregex(".*")

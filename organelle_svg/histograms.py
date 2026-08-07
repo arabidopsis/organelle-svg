@@ -7,7 +7,8 @@ from .band_utils import iter_features
 from .svg_utils import hist
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterator
+    from collections.abc import Callable, Iterator
+    from typing import Any
     from xml.etree.ElementTree import Element
 
     from Bio.SeqFeature import SeqFeature, SimpleLocation
@@ -52,7 +53,7 @@ def depth_hist(sff_rec: SeqRecord) -> Iterator[Hist]:
     def gattr(part: SimpleLocation) -> float:
         if not hasattr(part, "depth"):
             return -0.1
-        v = getattr(part, "depth")
+        v = part.depth
         if math.isnan(v):
             return -0.1
         return float(v)

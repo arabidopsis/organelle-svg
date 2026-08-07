@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-from collections import Counter
-from collections import defaultdict
+from collections import Counter, defaultdict
 from typing import TYPE_CHECKING
 
 from Bio.SeqFeature import SimpleLocation
 
-from .band_utils import intrange
-from .band_utils import intrangeset
-from .band_utils import iter_features
+from .band_utils import intrange, intrangeset, iter_features
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterator
+    from collections.abc import Callable, Iterator
+    from typing import Any
 
     from Bio.SeqFeature import SeqFeature
     from Bio.SeqRecord import SeqRecord

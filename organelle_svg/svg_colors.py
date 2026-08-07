@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from .og_colors import get_colors_for_genome
 
 if TYPE_CHECKING:
-    from typing import Callable
+    from collections.abc import Callable
 
     from .og_colors import PatternKeys
 

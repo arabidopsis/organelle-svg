@@ -1,25 +1,27 @@
 from __future__ import annotations
 
-from typing import override
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from .band_utils import iter_features
-from .ogdraw_svg import BaseDraw
-from .ogdraw_svg import default_namer
-from .ogdraw_svg import DepthDraw
-from .ogdraw_svg import get_gene_names
-from .ogdraw_svg import get_gene_names_from_features
-from .ogdraw_svg import rotate
-from .ogdraw_svg import show_band
-from .svg_colors import BG_COLOR_SFF
-from .svg_colors import STRAND_COLORS
-from .svg_utils import annular_path
-from .svg_utils import circle
-from .svg_utils import group
-from .svg_utils import maker
-from .svg_utils import path
-from .svg_utils import styles_to_classes
-from .svg_utils import text_perp
+from .ogdraw_svg import (
+    BaseDraw,
+    DepthDraw,
+    default_namer,
+    get_gene_names,
+    get_gene_names_from_features,
+    rotate,
+    show_band,
+)
+from .svg_colors import BG_COLOR_SFF, STRAND_COLORS
+from .svg_utils import (
+    annular_path,
+    circle,
+    group,
+    maker,
+    path,
+    styles_to_classes,
+    text_perp,
+)
 
 if TYPE_CHECKING:
     from typing import Any, Unpack
@@ -191,7 +193,7 @@ class NormalDraw(BaseDraw):
     def bands(self, **attrib: Any) -> None:
         r, g, get_angle, sw = self.r, self.g, self.get_angle, self.sw
 
-        attrib = self.merge_attr(attrib, **{"stroke": "black", "stroke_width": sw})
+        attrib = self.merge_attr(attrib, stroke="black", stroke_width=sw)
 
         pos0, pos1, dr = self.get_band_pos()
         klass = "band"

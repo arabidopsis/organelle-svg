@@ -5,18 +5,13 @@ import logging
 import os
 import re
 from collections import defaultdict
+from collections.abc import Iterator
 from datetime import date
 from pathlib import Path
-from typing import IO
-from typing import Iterator
-from typing import Literal
-from typing import NamedTuple
-from typing import TypeAlias
+from typing import IO, Literal, NamedTuple, TypeAlias
 
 from Bio.Seq import Seq
-from Bio.SeqFeature import CompoundLocation
-from Bio.SeqFeature import SeqFeature
-from Bio.SeqFeature import SimpleLocation
+from Bio.SeqFeature import CompoundLocation, SeqFeature, SimpleLocation
 from Bio.SeqRecord import SeqRecord
 
 logger = logging.getLogger("chloe")
@@ -34,7 +29,7 @@ class SFFSeqRecord(SeqRecord):  # pylint: disable=abstract-method
     is_sffseq = True
 
 
-NAN = re.compile("^nan$", re.I)
+NAN = re.compile("^nan$", re.IGNORECASE)
 
 F1 = 0x1
 F2 = 0x2

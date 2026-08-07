@@ -1,21 +1,17 @@
 from __future__ import annotations
 
-from typing import override
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from intervaltree import IntervalTree  # type: ignore[attr-defined]
 
-from .ogdraw_svg import BaseDraw
-from .ogdraw_svg import create_band
+from .ogdraw_svg import BaseDraw, create_band
 from .svg import add_center_text
 from .svg_colors import colorer
-from .svg_utils import circle
-from .svg_utils import group
-from .svg_utils import styles_to_classes
-from .svg_utils import ticks
+from .svg_utils import circle, group, styles_to_classes, ticks
 
 if TYPE_CHECKING:
-    from typing import Any, Iterator, Sequence, Unpack
+    from collections.abc import Iterator, Sequence
+    from typing import Any, Unpack
     from xml.etree.ElementTree import Element
 
     from Bio.SeqFeature import SeqFeature

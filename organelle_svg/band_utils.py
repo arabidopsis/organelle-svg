@@ -7,7 +7,8 @@ from Bio.Seq import UndefinedSequenceError
 from sortedcontainers import SortedList  # type: ignore[import-untyped]
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterator
+    from collections.abc import Callable, Iterator
+    from typing import Any
 
     from Bio.SeqFeature import SeqFeature, SimpleLocation
     from Bio.SeqRecord import SeqRecord
@@ -29,7 +30,7 @@ def has_seq(rec: SeqRecord) -> bool:
 
 
 class intrange:
-    __slots__ = ("start", "end")
+    __slots__ = ("end", "start")
 
     def __init__(self, start: int, end: int):
         # all ranges are open [start,end)
@@ -40,7 +41,7 @@ class intrange:
     def __len__(self) -> int:
         return self.end - self.start
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, intrange):
             return False
         return other.start == self.start and other.end == self.end
@@ -192,7 +193,7 @@ def iter_features(rec: SeqRecord) -> Iterator[tuple[int, SeqFeature]]:
             yield idx, f
             idx += 1
         elif f.type == "gene" and hasattr(f, "sub_features"):  # from BCBio.GFF
-            for sf in getattr(f, "sub_features"):
+            for sf in f.sub_features:
                 if sf.type in TYPES:
                     yield idx, sf
                 idx += 1
@@ -212,8 +213,7 @@ class overlapset:
         s, e = size * (ir.start // size), size * (ir.end // size)
         if e < ir.end:
             e += size
-        if e > end:
-            e = end
+        e = min(e, end)
         for i in range(s, e, size):
             buckets[i].add(ir.start)
             m[ir.start].add(ir)
@@ -231,8 +231,7 @@ class overlapset:
         s, e = size * (ir.start // size), size * (ir.end // size)
         if e < ir.end:
             e += size
-        if e > end:
-            e = end
+        e = min(e, end)
 
         def ii() -> Iterator[intrange]:
             for b in range(s, e, size):

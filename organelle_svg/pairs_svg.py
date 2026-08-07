@@ -1,30 +1,30 @@
 from __future__ import annotations
 
-from typing import override
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from .bands import get_links
-from .ogdraw_svg import BaseDraw
-from .ogdraw_svg import get_gene_names
-from .ogdraw_svg import show_band
+from .ogdraw_svg import BaseDraw, get_gene_names, show_band
 from .svg_colors import STRAND_COLORS
-from .svg_utils import arc
-from .svg_utils import circle
-from .svg_utils import group
-from .svg_utils import maker
-from .svg_utils import middle
-from .svg_utils import Overlap
-from .svg_utils import path
-from .svg_utils import ribbon_path
-from .svg_utils import styles_to_classes
-from .svg_utils import text_arc
-from .svg_utils import text_horz
-from .svg_utils import text_len
-from .svg_utils import text_perp
-from .svg_utils import ticks
+from .svg_utils import (
+    Overlap,
+    arc,
+    circle,
+    group,
+    maker,
+    middle,
+    path,
+    ribbon_path,
+    styles_to_classes,
+    text_arc,
+    text_horz,
+    text_len,
+    text_perp,
+    ticks,
+)
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Unpack
+    from collections.abc import Callable
+    from typing import Any, Unpack
     from xml.etree.ElementTree import Element
 
     from Bio.SeqRecord import SeqRecord

@@ -2,21 +2,17 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from math import cos
-from math import pi
-from math import sin
-from math import tan
-from typing import TYPE_CHECKING
-from typing import TypeAlias
+from math import cos, pi, sin, tan
+from typing import TYPE_CHECKING, TypeAlias
 from uuid import uuid4
 from xml.etree.ElementTree import Element
 
-from .band_utils import intrange
-from .band_utils import intrangeset
+from .band_utils import intrange, intrangeset
 from .config import SVG_DEFAULT_FONTS
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterable
+    from collections.abc import Callable, Iterable
+    from typing import Any
 
     from .histograms import Hist
 
@@ -182,7 +178,7 @@ def tostyle(d: dict[str, Any]) -> str:
     ret = attr(d)
     if "style" in ret:
         style = ret.pop("style")
-    sret = ";".join(f"{k}:{str(v)}" for k, v in sorted(ret.items()))
+    sret = ";".join(f"{k}:{v!s}" for k, v in sorted(ret.items()))
     if sret:
         sret += ";"
     if style is not None:
@@ -191,7 +187,7 @@ def tostyle(d: dict[str, Any]) -> str:
 
 
 def toattrs(d: dict[str, Any]) -> str:
-    return " ".join(f'{k}="{str(v)}"' for k, v in sorted(attr(d).items()))
+    return " ".join(f'{k}="{v!s}"' for k, v in sorted(attr(d).items()))
 
 
 radiansconversion = pi / 180.0
@@ -221,14 +217,7 @@ def relative_arc(r: float, a0: float, a1: float, x: float = 0, y: float = 0) -> 
     xe0, ye0 = frompolar(a1, r)
     xe0 += x
     ye0 += y
-    return "A {:.4f} {:.4f} 0 {:d} {:d} {:.4f} {:.4f}".format(
-        r,
-        r,
-        large_arc_flag,
-        d,
-        xe0,
-        ye0,
-    )
+    return f"A {r:.4f} {r:.4f} 0 {large_arc_flag:d} {d:d} {xe0:.4f} {ye0:.4f}"
 
 
 def line_arc(r: float, a0: float, a1: float, x: float = 0, y: float = 0) -> str:
@@ -254,23 +243,9 @@ def pie(
     d = 1 if endangle > startangle else 0
     ret = [
         f"M {xs0:.4f} {ys0:.4f}",
-        "A {:.4f} {:.4f} 0 {:d} {:d} {:.4f} {:.4f}".format(
-            r,
-            r,
-            large_arc_flag,
-            d,
-            xe0,
-            ye0,
-        ),
+        f"A {r:.4f} {r:.4f} 0 {large_arc_flag:d} {d:d} {xe0:.4f} {ye0:.4f}",
         f"L {xe1:.4f} {ye1:.4f}",
-        "A {:.4f} {:.4f} 0 {:d} {:d} {:.4f} {:.4f}".format(
-            r1,
-            r1,
-            large_arc_flag,
-            abs(d - 1),
-            xs1,
-            ys1,
-        ),
+        f"A {r1:.4f} {r1:.4f} 0 {large_arc_flag:d} {abs(d - 1):d} {xs1:.4f} {ys1:.4f}",
         f"L {xs0:.4f} {ys0:.4f} Z",
     ]
     return " ".join(ret)
@@ -311,14 +286,7 @@ def ribbon_path(
     ret = [
         f"M {xs0:.4f} {ys0:.4f}",
         f"A {r0:.4f} {r0:.4f} 0 {laf0:d} {d0:d} {xe0:.4f} {ye0:.4f}",
-        "C {:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}".format(
-            xm0,
-            ym0,
-            xm1,
-            ym1,
-            xs1,
-            ys1,
-        ),
+        f"C {xm0:.4f} {ym0:.4f} {xm1:.4f} {ym1:.4f} {xs1:.4f} {ys1:.4f}",
     ]
     xm0, ym0 = frompolar(e1, bezier_radius)
     xm1, ym1 = frompolar(s0, bezier_radius)
@@ -327,22 +295,8 @@ def ribbon_path(
     #     xm1, ym1 = crestx + (xs0 - crestx)*bezier_radius/r1, cresty + (ys0 - cresty)*bezier_radius/r1
     ret.extend(
         [
-            "A {:.4f} {:.4f} 0 {:d} {:d} {:.4f} {:.4f}".format(
-                r1,
-                r1,
-                laf1,
-                d1,
-                xe1,
-                ye1,
-            ),
-            "C {:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f} Z".format(
-                xm0,
-                ym0,
-                xm1,
-                ym1,
-                xs0,
-                ys0,
-            ),
+            f"A {r1:.4f} {r1:.4f} 0 {laf1:d} {d1:d} {xe1:.4f} {ye1:.4f}",
+            f"C {xm0:.4f} {ym0:.4f} {xm1:.4f} {ym1:.4f} {xs0:.4f} {ys0:.4f} Z",
         ],
     )
     return " ".join(ret)
@@ -370,14 +324,7 @@ def bezier_path(
     #     xm1, ym1 = crestx + (xs1 - crestx)*bezier_radius/r1, cresty + (ys1 - cresty)*bezier_radius/r1
     ret = [
         f"M {xs0:.4f} {ys0:.4f}",
-        "C {:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}".format(
-            xm0,
-            ym0,
-            xm1,
-            ym1,
-            xs1,
-            ys1,
-        ),
+        f"C {xm0:.4f} {ym0:.4f} {xm1:.4f} {ym1:.4f} {xs1:.4f} {ys1:.4f}",
     ]
     return " ".join(ret)
 
@@ -988,7 +935,7 @@ def ticks(
     g2 = group(klass=klass(attrib, "ticks"))
 
     if get_angle is None:
-        get_angle = lambda b: b * 360 / nbases  # noqa: E731
+        get_angle = lambda b: b * 360 / nbases
     if not font_size:
         font_size = r(0.04)
     dx = 0
