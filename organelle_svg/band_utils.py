@@ -191,7 +191,7 @@ def iter_features(rec: SeqRecord) -> Iterator[tuple[int, SeqFeature]]:
             yield idx, f
             idx += 1
         elif f.type == "gene" and hasattr(f, "sub_features"):  # from BCBio.GFF
-            for sf in f.sub_features:
+            for sf in f.sub_features:  # type: ignore
                 if sf.type in TYPES:
                     yield idx, sf
                 idx += 1

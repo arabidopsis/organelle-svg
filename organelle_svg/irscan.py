@@ -100,6 +100,10 @@ class Scanner:
         pre_borders = self.rough_scan()
         if pre_borders is None:
             return None
+        ira_start: int | None
+        ira_end: int | None
+        irb_start: int | None
+        irb_end: int | None
         ira_start, ira_end, irb_start, irb_end = pre_borders
 
         ira_start, irb_end = self.screen_from_to_pos(

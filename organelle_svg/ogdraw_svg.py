@@ -106,7 +106,7 @@ def show_band(
     def create_glyph(gene: str, part: SimpleLocation, color: str) -> Element:
         c = ""
         if hasattr(part, "comment"):
-            c = part.comment or "" # type: ignore
+            c = part.comment or ""  # type: ignore
             c = " " + str(c) if c else ""
         fmt = f"{gene}:[{part.start + 1}..{part.end}]{c}"  # type: ignore
         attr = {"data-info": fmt, **attrib}
@@ -226,7 +226,7 @@ def show_overlap(
     dnamer = default_namer(rec.name)
 
     def isintron(part: SimpleLocation) -> bool:
-        return hasattr(part, "intron") and part.intron # type: ignore
+        return hasattr(part, "intron") and part.intron  # type: ignore
 
     def namer(feat: SeqFeature, part: SimpleLocation) -> str:
         if isintron(part):
@@ -985,7 +985,7 @@ class OGDraw(BaseDraw):
             g = try_name(feat.qualifiers)
             if feat.location:
                 for loc in feat.location.parts:
-                    if hasattr(loc, "comment") and loc.comment: # type: ignore
+                    if hasattr(loc, "comment") and loc.comment:  # type: ignore
                         return g + "*"  # f" ({loc.comment})"
             return g
 
