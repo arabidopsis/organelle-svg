@@ -53,7 +53,7 @@ def depth_hist(sff_rec: SeqRecord) -> Iterator[Hist]:
     def gattr(part: SimpleLocation) -> float:
         if not hasattr(part, "depth"):
             return -0.1
-        v = part.depth
+        v = part.depth # type: ignore
         if math.isnan(v):
             return -0.1
         return float(v)
