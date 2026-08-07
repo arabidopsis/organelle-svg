@@ -61,6 +61,10 @@ class GeneColor:
         return f"rgba({','.join(str(s) for s in c)})"
 
 
+def totuple(c: str) -> ColourTuple:
+    return tuple(int(c.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4))  # type: ignore
+
+
 PatternKeys: TypeAlias = Literal["type", "pattern"]
 
 Plastome: list[GeneColor] = [

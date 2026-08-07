@@ -560,7 +560,7 @@ def hist(
     r: Callable[[float], float],
     get_angle: Callable[[int], float],
     offset: bool = True,
-    background: bool = False,
+    background: bool | str = False,
     inverted: bool = False,
     rule: Callable[[Hist], tuple[float, dict[str, Any] | None]] | None = None,
     **attrib: Any,

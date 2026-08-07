@@ -3,7 +3,7 @@ from __future__ import annotations
 import gzip
 from functools import wraps
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable
 
 import click
 
@@ -22,10 +22,10 @@ def read_rec(fname: str | Path, rec_type: str) -> SeqRecord:
     fname = Path(fname)
     if fname.name.endswith(".gz"):
         with gzip.open(fname, "rt", encoding="utf-8") as fp:
-            return next(SeqIO.parse(fp, rec_type))
+            return next(SeqIO.parse(fp, rec_type))  # type: ignore
 
     with open(fname, encoding="utf-8") as fp:
-        return next(SeqIO.parse(fp, rec_type))
+        return next(SeqIO.parse(fp, rec_type))  # type: ignore
 
 
 def readit(gb_or_sff: str) -> SeqRecord:
@@ -33,14 +33,16 @@ def readit(gb_or_sff: str) -> SeqRecord:
 
     from .bio_sff import readsff
 
+    rec: SeqRecord
+
     if gb_or_sff.endswith((".sff", ".sff.gz")):
         rec = readsff(gb_or_sff, include_introns=True, expand_features=False)
     elif gb_or_sff.endswith((".gff.gz", ".gff3.gz")):
         with gzip.open(gb_or_sff, "rt", encoding="utf-8") as fp:
-            rec = next(GFF.parse(fp))
+            rec = next(GFF.parse(fp))  # type: ignore
     elif gb_or_sff.endswith((".gff", ".gff3")):
         with open(gb_or_sff, encoding="utf-8") as fp:
-            rec = next(GFF.parse(fp))
+            rec = next(GFF.parse(fp))  # type: ignore
     else:
         rec = read_rec(gb_or_sff, "genbank")
     if "source" not in rec.annotations:
@@ -48,7 +50,7 @@ def readit(gb_or_sff: str) -> SeqRecord:
     return rec
 
 
-def style_options(func):
+def style_options(func: Callable[..., None]) -> Callable[..., None]:
     from .api import DrawStyle
 
     @wraps(func)
@@ -86,8 +88,8 @@ def style_options(func):
         text_color: str,
         stroke_circles: str,
         stroke: str,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         style = DrawStyle(
             bg=bg,
             text_color=text_color,
@@ -101,7 +103,7 @@ def style_options(func):
     return style_options_inner
 
 
-def all_options(func):
+def all_options(func: Callable[..., None]) -> Callable[..., None]:
     func = click.option(
         "-o",
         "--output",
@@ -141,7 +143,9 @@ def out(output: str | None, svg: str) -> None:
         )
 
 
-def plot_type(choices: list[str]):
+def plot_type(
+    choices: list[str],
+) -> Callable[[Callable[..., None]], Callable[..., None]]:
     return click.option(
         "--type",
         "plot_type",

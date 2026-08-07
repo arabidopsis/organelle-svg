@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import override
 from typing import TYPE_CHECKING
 
-from intervaltree import IntervalTree
+from intervaltree import IntervalTree  # type: ignore[attr-defined]
 
 from .ogdraw_svg import BaseDraw
 from .ogdraw_svg import create_band
@@ -78,8 +78,8 @@ class StackedDraw(BaseDraw):
 
     def layers(self) -> Iterator[tuple[SeqFeature, int]]:
         itree: dict[int | None, IntervalTree] = {
-            1: IntervalTree(),
-            -1: IntervalTree(),
+            1: IntervalTree(),  # type: ignore[no-untyped-call]
+            -1: IntervalTree(),  # type: ignore[no-untyped-call]
         }
         itree[0] = itree[-1]
         itree[None] = itree[1]
@@ -145,8 +145,8 @@ class StackedDraw(BaseDraw):
 
     def get_gene(self, feat: SeqFeature) -> str:
         if "gene" in feat.qualifiers:
-            return feat.qualifiers["gene"][0]
-        return feat.type
+            return str(feat.qualifiers["gene"][0])
+        return str(feat.type)
 
     def postscript(self) -> None:
         ngenomes = len({r.id for r in self.recs})

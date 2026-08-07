@@ -127,7 +127,7 @@ def intron_walker_(
 
             # actual intron that doesn't overlap other genes
             if not ranges[strand or 0].overlaps(intrange(s, e)):
-                yield "intron", SimpleLocation(s, e, strand)
+                yield "intron", SimpleLocation(s, e, strand)  # type: ignore[no-untyped-call]
         # circos fails if start == end even though this is a 1 bp span
         # see /lib/Circos/Karyotype.pm line 134
         assert end >= start

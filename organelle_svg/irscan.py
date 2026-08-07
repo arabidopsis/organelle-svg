@@ -33,7 +33,8 @@ class Scanner:
         # don't need unicode use byte comparisons....
         self.seq = str(seq).encode("ascii")
         # memoryview so rev[i:j] just creates a view and does not copy `wordsize` bytes
-        self.rev = memoryview(str(seq.reverse_complement()).encode("ascii"))
+        s = seq.reverse_complement()  # type: ignore[no-untyped-call]
+        self.rev = memoryview(str(s).encode("ascii"))
         self.precision = precision
         self.wordsize = wordsize
         self.rough = rough

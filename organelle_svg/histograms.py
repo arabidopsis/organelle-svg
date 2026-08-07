@@ -35,9 +35,10 @@ class Hist:
 def gc_hist(rec: SeqRecord, span: int = 100) -> Iterator[Hist]:
     if rec.seq is None:
         return
-    seq = rec.seq.lower()
+    seq = str(rec.seq).lower()
     n = len(seq)
     # span = n // span
+    v: float
     for i in range(0, n, span):
         r = seq[i : i + span]
         start = i  # + 1
@@ -54,7 +55,7 @@ def depth_hist(sff_rec: SeqRecord) -> Iterator[Hist]:
         v = getattr(part, "depth")
         if math.isnan(v):
             return -0.1
-        return v
+        return float(v)
 
     yield from sff_hist(sff_rec, gattr)
 

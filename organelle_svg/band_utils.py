@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from Bio.Seq import UndefinedSequenceError
-from sortedcontainers import SortedList
+from sortedcontainers import SortedList  # type: ignore[import-untyped]
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Iterator
@@ -109,7 +109,7 @@ class intrangeset:
         # we keep that state that all adjacent and overlapping ranges are merged
         # so that there are just a sorted list of non-overlapping
         # ranges that don't abut.
-        self.ss = SortedList()
+        self.ss = SortedList()  # type: ignore[no-untyped-call]
         self.m: dict[int, intrange] = {}
         if args is not None:
             for a in args:
@@ -203,7 +203,7 @@ def iter_features(rec: SeqRecord) -> Iterator[tuple[int, SeqFeature]]:
 class overlapset:
     def __init__(self, start: int, end: int, size: int):
         self.start, self.end, self.size = start, end, size
-        self.buckets = {i: SortedList() for i in range(start, end, size)}
+        self.buckets = {i: SortedList() for i in range(start, end, size)}  # type: ignore[no-untyped-call]
         self.m: dict[int, set[intrange]] = defaultdict(set)
 
     def add(self, ir: intrange) -> None:
@@ -307,6 +307,7 @@ class Overlapping:
         size = len(rec) // nblocks
         size = 1 if size == 0 else size
         b = {strands(s): overlapset(0, len(rec), size) for s in (1, -1, 0, None)}
+        part: SimpleLocation
         for _, feat in iter_features(rec):
             if feat.location is None:
                 continue

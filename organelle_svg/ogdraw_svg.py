@@ -108,7 +108,7 @@ def show_band(
 
     def isintron(loc: SimpleLocation) -> bool:
         if hasattr(loc, "intron"):
-            return getattr(loc, "intron")
+            return bool(getattr(loc, "intron"))
         return False
 
     namer = default_namer(rec.name)
@@ -281,7 +281,7 @@ def default_namer(default: str) -> Callable[[dict[str, Any]], str]:
         # gene from sff, Parent from .gff3
         for n in TRY_NAMES:
             if n in q:
-                return q[n][0]
+                return str(q[n][0])
         nc += 1
         return f"{default}/{nc}"
 

@@ -78,7 +78,7 @@ class SFFLocation(SimpleLocation):
         intron: bool = False,
         comment: str | None = None,
     ):
-        super().__init__(start, end, strand)
+        super().__init__(start, end, strand)  # type: ignore
         # extra stuff
         self.key = key  # original key gene/gene_count/type/exon_count
         self.phase = phase
@@ -216,7 +216,7 @@ def readsff_fp(
                 xtypes = ["intron"]
                 # return None
             feature_type = xtypes[0]
-            xlocation = CompoundLocation(list(locations))
+            xlocation = CompoundLocation(list(locations))  # type: ignore[no-untyped-call]
         else:
             feature_type, xlocation = (
                 types[0],
@@ -242,7 +242,7 @@ def readsff_fp(
         if len(keys) == 1:
             key = keys.pop()
             qualifiers["ID"] = [key]
-        return SeqFeature(
+        return SeqFeature(  # type: ignore[no-untyped-call]
             xlocation,
             type=feature_type,
             id=f"{gene}/{gene_count}",
@@ -253,7 +253,7 @@ def readsff_fp(
         Seq(None, length),
         id=ncid,
         name=ncid,
-        annotations=annotations,
+        annotations=annotations,  # type: ignore[arg-type]
         description=f"Chloe Annotation for {ncid}",
     )
     for (gene, gene_count), locations in gdict.items():
